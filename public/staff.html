@@ -64,12 +64,29 @@
       align-items: center;
       gap: 10px;
       transition: background 0.15s, color 0.15s;
+      cursor: pointer;
+      border: none;
+      background: none;
+      text-align: left;
+      width: 100%;
+      font-family: inherit;
     }
     .nav-item:hover,
     .nav-item.active {
       background: rgba(255, 255, 255, 0.1);
       color: #FFFFFF;
     }
+    .nav-item.lab-btn {
+      color: var(--ticket);
+      margin-top: 10px;
+      border: 1px dashed rgba(255, 210, 63, 0.4);
+      background: rgba(255, 210, 63, 0.08);
+    }
+    .nav-item.lab-btn:hover {
+      background: rgba(255, 210, 63, 0.18);
+      color: #FFFFFF;
+    }
+
     .user-profile {
       padding-top: 16px;
       border-top: 1px solid rgba(255, 255, 255, 0.15);
@@ -419,6 +436,169 @@
       margin-left: 4px;
     }
 
+    /* Demo Lab Drawer (UI-UX.md section 4.4) */
+    .demolab-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 440px;
+      max-width: 92vw;
+      height: 100vh;
+      background: var(--paper);
+      box-shadow: -8px 0 32px rgba(20, 33, 61, 0.25);
+      z-index: 850;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .demolab-drawer.open {
+      transform: translateX(0);
+    }
+    .demolab-header {
+      padding: 22px 24px;
+      background: #0B132B;
+      color: #FFFFFF;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .demolab-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .demo-badge {
+      background: var(--ticket);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: var(--r-pill);
+      text-transform: uppercase;
+    }
+    .btn-close-drawer {
+      background: none;
+      border: none;
+      color: #94A3B8;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .btn-close-drawer:hover {
+      color: #FFFFFF;
+      background: rgba(255,255,255,0.1);
+    }
+    .demolab-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .demolab-section {
+      background: var(--mist);
+      border: 1px solid var(--line);
+      border-radius: var(--r-panel);
+      padding: 16px 18px;
+    }
+    .btn-sim-action {
+      background: var(--signal);
+      color: #FFFFFF;
+      border: none;
+      padding: 12px 14px;
+      border-radius: var(--r-panel);
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .btn-sim-action:hover {
+      background: #254ED0;
+    }
+    .btn-sim-action.outline {
+      background: var(--paper);
+      color: var(--ink);
+      border: 1.5px solid var(--line);
+    }
+    .btn-sim-action.outline:hover {
+      background: #E2E8F0;
+    }
+    .btn-sim-stream {
+      background: #1E293B;
+      color: #FFFFFF;
+      border: none;
+      padding: 10px;
+      border-radius: var(--r-panel);
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* What-If Panel inside Drawer */
+    .whatif-panel {
+      background: #F8FAFC;
+      border: 2px solid #CBD5E1;
+      border-radius: var(--r-panel);
+      padding: 18px 20px;
+    }
+    .whatif-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+    .whatif-comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 14px 0;
+      text-align: center;
+    }
+    .whatif-stat-box {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 6px;
+    }
+    .whatif-stat-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .whatif-stat-value {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--ink);
+    }
+    .btn-whatif-open {
+      background: var(--go);
+      color: #FFFFFF;
+      border: none;
+      padding: 10px;
+      border-radius: var(--r-panel);
+      font-weight: 800;
+      font-size: 14px;
+      width: 100%;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-whatif-open:hover {
+      background: #0E8365;
+    }
+
     /* Toast Notification */
     .toast-container {
       position: fixed;
@@ -506,6 +686,9 @@
         <a href="/staff" class="nav-item active">Queue Control</a>
         <a href="/admin" class="nav-item">Analytics</a>
         <a href="/display/demo" class="nav-item" target="_blank">Display Board ↗</a>
+        <button type="button" class="nav-item lab-btn" id="openDemoLabBtn">
+          🧪 Demo Lab
+        </button>
       </nav>
 
       <div class="user-profile">
@@ -572,6 +755,88 @@
     </aside>
   </div>
 
+  <!-- Demo Lab Drawer (UI-UX 4.4) -->
+  <aside class="demolab-drawer" id="demoLabDrawer">
+    <div class="demolab-header">
+      <div>
+        <div class="demolab-title">
+          <span>Demo Lab</span>
+          <span class="demo-badge">Demo mode</span>
+        </div>
+        <div style="font-size: 13px; color: #94A3B8; margin-top: 2px;">Simulation & What-If Sandbox</div>
+      </div>
+      <button type="button" class="btn-close-drawer" id="closeDemoLabBtn">✕</button>
+    </div>
+
+    <div class="demolab-body">
+      <!-- Quick Simulation Triggers -->
+      <div class="demolab-section">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <button type="button" class="btn-sim-action" id="addRushBtn">Add 20 people</button>
+          <button type="button" class="btn-sim-action outline" id="resetDemoBtn">Reset demo</button>
+        </div>
+      </div>
+
+      <!-- Steady Arrivals Slider -->
+      <div class="demolab-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-weight: 700; font-size: 14px;">Arrivals per minute</span>
+          <span id="arrivalsRateDisplay" class="num" style="font-weight: 800; font-size: 16px; color: var(--signal);">4</span>
+        </div>
+        <input type="range" id="arrivalsSlider" min="1" max="12" value="4" style="width: 100%; accent-color: var(--signal); cursor: pointer;">
+        <div style="display: flex; justify-content: space-between; margin-top: 6px;">
+          <span style="font-size: 12px; color: var(--muted);">Slow (1/m)</span>
+          <span style="font-size: 12px; color: var(--muted);">Rush (12/m)</span>
+        </div>
+        <button type="button" class="btn-sim-stream" id="toggleArrivalsBtn" style="margin-top: 10px; width: 100%;">
+          Start steady stream
+        </button>
+      </div>
+
+      <!-- Auto-Serve Checkbox -->
+      <div class="demolab-section">
+        <label style="display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 14px; cursor: pointer;">
+          <input type="checkbox" id="autoServeCheckbox" style="width: 18px; height: 18px; accent-color: var(--go);">
+          <span>Auto-serve at counters</span>
+        </label>
+        <div style="font-size: 12px; color: var(--muted); margin-top: 4px; margin-left: 28px;">
+          Counters automatically call and complete tokens around EMA speed
+        </div>
+
+        <button type="button" class="btn-sim-action outline" id="pauseCounter2Btn" style="margin-top: 14px; width: 100%;">
+          Pause Counter 2
+        </button>
+      </div>
+
+      <!-- What-If Panel -->
+      <div class="whatif-panel">
+        <div class="whatif-title">What if...</div>
+        <div style="font-size: 14px; margin-bottom: 12px; color: var(--ink);">
+          Open 1 more counter for
+          <select id="whatifServiceSelect" class="custom-select" style="min-height: 38px; padding: 4px 10px; font-size: 14px; display: inline-block; width: auto; margin-left: 6px;">
+          </select>
+        </div>
+
+        <div class="whatif-comparison-grid">
+          <div class="whatif-stat-box">
+            <div class="whatif-stat-label">Now</div>
+            <div class="whatif-stat-value num" id="whatifNowVal">-- min</div>
+          </div>
+          <div class="whatif-stat-box">
+            <div class="whatif-stat-label">After</div>
+            <div class="whatif-stat-value num" id="whatifAfterVal" style="color: var(--signal);">-- min</div>
+          </div>
+          <div class="whatif-stat-box">
+            <div class="whatif-stat-label">Saves</div>
+            <div class="whatif-stat-value num" id="whatifSavesVal" style="color: var(--go);">-- min</div>
+          </div>
+        </div>
+
+        <button type="button" class="btn-whatif-open" id="whatifOpenBtn">Open it</button>
+      </div>
+    </div>
+  </aside>
+
   <!-- Toast Feed -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -636,6 +901,7 @@
     let waitingTokens = [];
     let noShowTokens = [];
     let timerInterval = null;
+    let isStreamRunning = false;
 
     if (!authToken) {
       window.location.href = '/login.html';
@@ -685,6 +951,24 @@
       return data;
     }
 
+    // Number Tween Helper for Projector View (UI-UX 4.4)
+    function tweenNumber(element, targetVal, suffix = '') {
+      const startVal = parseInt(element.textContent, 10) || 0;
+      if (startVal === targetVal) {
+        element.textContent = `${targetVal}${suffix}`;
+        return;
+      }
+      const duration = 400;
+      const start = performance.now();
+      function step(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const cur = Math.round(startVal + (targetVal - startVal) * progress);
+        element.textContent = `${cur}${suffix}`;
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
     // Load full dashboard queue
     async function loadDashboard() {
       try {
@@ -703,7 +987,14 @@
         if (data.branch && data.branch.name) {
           document.getElementById('branchIndicator').textContent = data.branch.name;
         }
-        updateCopilotAdvice(activeCounters, waitingTokens);
+
+        // Fetch live copilot recommendations
+        fetchCopilotAdvice();
+
+        // Refresh What-If numbers if drawer is open
+        if (document.getElementById('demoLabDrawer').classList.contains('open')) {
+          refreshWhatIf();
+        }
       } catch (err) {
         console.error('Failed to load staff queue:', err);
       }
@@ -736,7 +1027,6 @@
             <div class="timer-badge num" data-start="${new Date(startTime).getTime()}">00:00</div>
           `;
 
-          // If current token has priority claim, allow verification directly at counter
           if (currentTok.priorityType && currentTok.priorityType !== 'normal') {
             const pVer = currentTok.priorityVerified;
             priorityTileHtml = `
@@ -759,7 +1049,6 @@
           displayHtml = `<div class="idle-label">idle</div>`;
         }
 
-        // Action buttons
         let actionsHtml = '';
         if (c.status === 'open') {
           if (isIdle) {
@@ -918,23 +1207,31 @@
       });
     }
 
-    // Copilot Advice Engine
-    function updateCopilotAdvice(counters, tokens) {
-      const card = document.getElementById('copilotCard');
-      const text = document.getElementById('copilotText');
-      const btn = document.getElementById('copilotActionBtn');
+    // Copilot Advice Engine (fetches GET /api/copilot/suggestions)
+    async function fetchCopilotAdvice() {
+      try {
+        const res = await staffFetch(`/api/copilot/suggestions?branchId=${branchId}`);
+        const text = document.getElementById('copilotText');
+        const btn = document.getElementById('copilotActionBtn');
 
-      const labTokens = tokens.filter(t => t.serviceId && t.serviceId.prefix === 'L');
-      const closedCounter3 = counters.find(c => c.number === 3 && c.status === 'closed');
+        if (res && res.suggestions && res.suggestions.length > 0) {
+          const top = res.suggestions[0];
+          text.innerHTML = `<strong>Staff Copilot:</strong> ${top.text}`;
 
-      if (labTokens.length >= 2 && closedCounter3) {
-        text.innerHTML = `<strong>Staff Copilot:</strong> Lab wait is elevated (${labTokens.length} waiting). Open Counter 3 to bring it to half.`;
-        btn.style.display = 'block';
-        btn.textContent = 'Open Counter 3';
-        btn.onclick = () => setCounterStatus(closedCounter3._id, 'open');
-      } else {
-        text.textContent = 'All counters operating smoothly. No urgent reallocations suggested.';
-        btn.style.display = 'none';
+          if (top.action) {
+            btn.style.display = 'block';
+            btn.textContent = top.action.label;
+            btn.onclick = async () => {
+              if (top.action.type === 'set_counter_status') {
+                await setCounterStatus(top.action.counterId, top.action.status);
+              }
+            };
+          } else {
+            btn.style.display = 'none';
+          }
+        }
+      } catch (err) {
+        console.warn('Copilot advice check error:', err);
       }
     }
 
@@ -1022,10 +1319,8 @@
     // Keyboard shortcut 'N' for Call Next
     window.addEventListener('keydown', (e) => {
       if (e.key === 'n' || e.key === 'N') {
-        // Prevent trigger if focused on an input
         if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
         
-        // Find first open idle counter
         const idleCounter = activeCounters.find(c => c.status === 'open' && !c.currentTokenId);
         if (idleCounter) {
           handleCallNext(idleCounter._id);
@@ -1038,7 +1333,6 @@
     // Walk-in Ticket Modal Handling
     const modal = document.getElementById('walkinModal');
     document.getElementById('openWalkinModalBtn').addEventListener('click', async () => {
-      // Populate services
       const svcSelect = document.getElementById('walkinService');
       svcSelect.innerHTML = '';
       const publicData = await API.getBranchPublic(branchId);
@@ -1071,7 +1365,6 @@
         showToast(`Walk-in token ${res.token.code} created`);
         loadDashboard();
 
-        // Populate 58mm thermal ticket and trigger print
         const p = res.printable;
         document.getElementById('printBranchName').textContent = p.branchName;
         document.getElementById('printServiceName').textContent = p.serviceName;
@@ -1086,6 +1379,175 @@
         }, 1000);
       } catch (err) {
         showToast(err.message);
+      }
+    });
+
+    // ==========================================
+    // DEMO LAB DRAWER & WHAT-IF (UI-UX 4.4)
+    // ==========================================
+    const labDrawer = document.getElementById('demoLabDrawer');
+    document.getElementById('openDemoLabBtn').addEventListener('click', async () => {
+      labDrawer.classList.add('open');
+      await populateWhatIfServices();
+      await refreshWhatIf();
+    });
+
+    document.getElementById('closeDemoLabBtn').addEventListener('click', () => {
+      labDrawer.classList.remove('open');
+    });
+
+    // 1. Add 20 people rush
+    document.getElementById('addRushBtn').addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/sim/rush', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ branchId, count: 20 })
+        });
+        const data = await res.json();
+        showToast(`Added 20 people (${data.firstCode} to ${data.lastCode})`);
+        loadDashboard();
+      } catch (err) {
+        showToast(err.message);
+      }
+    });
+
+    // 2. Reset demo
+    document.getElementById('resetDemoBtn').addEventListener('click', async () => {
+      try {
+        await fetch('/api/sim/reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ branchId })
+        });
+        showToast('Demo data reset to clean initial state');
+        isStreamRunning = false;
+        document.getElementById('toggleArrivalsBtn').textContent = 'Start steady stream';
+        document.getElementById('autoServeCheckbox').checked = false;
+        loadDashboard();
+      } catch (err) {
+        showToast(err.message);
+      }
+    });
+
+    // 3. Steady arrivals slider
+    const arrivalsSlider = document.getElementById('arrivalsSlider');
+    const rateDisplay = document.getElementById('arrivalsRateDisplay');
+    arrivalsSlider.addEventListener('input', () => {
+      rateDisplay.textContent = arrivalsSlider.value;
+      if (isStreamRunning) {
+        startArrivalsStream();
+      }
+    });
+
+    async function startArrivalsStream() {
+      const arrivalsPerMin = parseInt(arrivalsSlider.value, 10);
+      await fetch('/api/sim/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ branchId, arrivalsPerMin })
+      });
+      isStreamRunning = true;
+      document.getElementById('toggleArrivalsBtn').textContent = 'Stop steady stream';
+      document.getElementById('toggleArrivalsBtn').style.background = 'var(--flag)';
+    }
+
+    async function stopArrivalsStream() {
+      await fetch('/api/sim/stop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ branchId })
+      });
+      isStreamRunning = false;
+      document.getElementById('toggleArrivalsBtn').textContent = 'Start steady stream';
+      document.getElementById('toggleArrivalsBtn').style.background = '#1E293B';
+    }
+
+    document.getElementById('toggleArrivalsBtn').addEventListener('click', () => {
+      if (isStreamRunning) {
+        stopArrivalsStream();
+        showToast('Stopped steady arrivals stream');
+      } else {
+        startArrivalsStream();
+        showToast(`Started steady stream (${arrivalsSlider.value} arrivals/min)`);
+      }
+    });
+
+    // 4. Auto-serve checkbox
+    document.getElementById('autoServeCheckbox').addEventListener('change', async (e) => {
+      const enabled = e.target.checked;
+      await fetch('/api/sim/autoserve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ branchId, enabled })
+      });
+      showToast(enabled ? 'Auto-serve activated at open counters' : 'Auto-serve stopped');
+    });
+
+    // 5. Pause Counter 2 quick button
+    document.getElementById('pauseCounter2Btn').addEventListener('click', async () => {
+      const c2 = activeCounters.find(c => c.number === 2);
+      if (c2) {
+        const nextStatus = c2.status === 'break' ? 'open' : 'break';
+        await setCounterStatus(c2._id, nextStatus);
+        document.getElementById('pauseCounter2Btn').textContent = nextStatus === 'break' ? 'Resume Counter 2' : 'Pause Counter 2';
+      }
+    });
+
+    // 6. What-If Panel Logic
+    async function populateWhatIfServices() {
+      const select = document.getElementById('whatifServiceSelect');
+      if (select.children.length > 0) return;
+      try {
+        const publicData = await API.getBranchPublic(branchId);
+        select.innerHTML = '';
+        publicData.services.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s._id;
+          opt.textContent = `${s.name} (${s.prefix})`;
+          select.appendChild(opt);
+        });
+        select.addEventListener('change', refreshWhatIf);
+      } catch (e) {}
+    }
+
+    let lastWhatIfData = null;
+    async function refreshWhatIf() {
+      try {
+        const select = document.getElementById('whatifServiceSelect');
+        const svcId = select.value || '';
+        const res = await fetch(`/api/sim/whatif?branchId=${branchId}&serviceId=${svcId}&counters=1`);
+        const data = await res.json();
+        lastWhatIfData = data;
+
+        const nowEl = document.getElementById('whatifNowVal');
+        const afterEl = document.getElementById('whatifAfterVal');
+        const savesEl = document.getElementById('whatifSavesVal');
+
+        tweenNumber(nowEl, data.beforeMin, ' min');
+        tweenNumber(afterEl, data.afterMin, ' min');
+        tweenNumber(savesEl, data.savedMin, ' min');
+
+        const openBtn = document.getElementById('whatifOpenBtn');
+        openBtn.textContent = `Open Counter for ${data.serviceName || 'Service'}`;
+      } catch (err) {
+        console.warn('What-If fetch error:', err);
+      }
+    }
+
+    document.getElementById('whatifOpenBtn').addEventListener('click', async () => {
+      // Find a closed counter supporting this service
+      if (!lastWhatIfData) return;
+      const targetCounter = activeCounters.find(c =>
+        c.status === 'closed' && (c.serviceIds || []).some(s => s._id.toString() === lastWhatIfData.serviceId.toString())
+      ) || activeCounters.find(c => c.status === 'closed');
+
+      if (targetCounter) {
+        await setCounterStatus(targetCounter._id, 'open');
+        showToast(`Opened ${targetCounter.name} for ${lastWhatIfData.serviceName}`);
+        refreshWhatIf();
+      } else {
+        showToast('All counters for this service are already open');
       }
     });
 

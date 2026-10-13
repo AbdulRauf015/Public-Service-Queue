@@ -34,10 +34,11 @@ router.get('/branches/demo', async (req, res) => {
 });
 
 /**
- * GET /api/branches/:branchId/display
+ * GET /api/display/:branchId
  * Returns full live data for TV Display Board (Now Serving, Next 5, Average Wait, Join QR)
+ * TRD 6.1 specification
  */
-router.get('/branches/:branchId/display', async (req, res) => {
+async function getDisplayDataHandler(req, res) {
   try {
     let { branchId } = req.params;
     let branch = null;
@@ -110,6 +111,25 @@ router.get('/branches/:branchId/display', async (req, res) => {
     });
   } catch (err) {
     console.error('Error fetching display data:', err);
+    res.status(500).json({ error: { code: 'SERVER_ERROR', message: err.message } });
+  }
+}
+
+router.get('/display/:branchId', getDisplayDataHandler);
+router.get('/branches/:branchId/display', getDisplayDataHandler);
+
+/**
+ * GET /api/branches/:branchId/qr.png
+ * Returns PNG QR image pointing to /q/:branchId (TRD 6.1)
+ */
+router.get('/branches/:branchId/qr.png', async (req, res) => {
+  try {
+    const { branchId } = req.params;
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const joinUrl = `${baseUrl}/q/${branchId}`;
+    const buffer = await QRCode.toBuffer(joinUrl, { width: 300, margin: 1 });
+    res.type('image/png').send(buffer);
+  } catch (err) {
     res.status(500).json({ error: { code: 'SERVER_ERROR', message: err.message } });
   }
 });

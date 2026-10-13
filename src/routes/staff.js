@@ -358,4 +358,21 @@ router.post('/tokens/walk-in', async (req, res) => {
   }
 });
 
+const { getCopilotSuggestions } = require('../services/copilot');
+
+/**
+ * GET /api/copilot/suggestions?branchId=
+ * Returns Staff Copilot recommendations (TRD 4.5 & 6.2)
+ */
+router.get('/copilot/suggestions', async (req, res) => {
+  try {
+    const branchId = req.query.branchId || req.user.branchId;
+    const result = await getCopilotSuggestions(branchId);
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching copilot suggestions:', error);
+    res.status(500).json({ error: { code: 'SERVER_ERROR', message: error.message } });
+  }
+});
+
 module.exports = router;

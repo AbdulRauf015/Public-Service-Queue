@@ -36,6 +36,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const publicRoutes = require('./src/routes/public');
 const authRoutes = require('./src/routes/auth');
 const staffRoutes = require('./src/routes/staff');
+const simRoutes = require('./src/routes/sim');
 const { setupSockets } = require('./src/sockets');
 
 // Health check endpoint
@@ -49,6 +50,7 @@ app.get('/api/health', (req, res) => {
 
 // Mount API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/sim', simRoutes);
 app.use('/api', publicRoutes);
 app.use('/api', staffRoutes);
 

@@ -452,7 +452,7 @@
     // Load display data from server
     async function loadDisplayData() {
       try {
-        const res = await fetch(`/api/branches/${branchId}/display`);
+        const res = await fetch(`/api/display/${branchId}`);
         if (!res.ok) throw new Error('Failed to load display board data');
         const data = await res.json();
 
