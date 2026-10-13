@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Display Board · Baari</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0B132B; /* High-contrast dark display room theme */
+      color: #FFFFFF;
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header Bar */
+    .display-header {
+      background: rgba(20, 33, 61, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.12);
+      padding: 24px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .branch-title {
+      font-family: var(--font-display);
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-tag {
+      background: var(--ticket);
+      color: var(--ink);
+      font-size: 16px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: var(--r-pill);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .live-clock {
+      font-family: var(--font-display);
+      font-size: 40px;
+      font-weight: 700;
+      color: #93C5FD;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Main Board Layout */
+    .display-main {
+      flex: 1;
+      padding: 40px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+      justify-content: center;
+    }
+
+    .section-label {
+      font-size: 24px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #94A3B8;
+      margin-bottom: 18px;
+    }
+
+    /* Now Serving Grid */
+    .serving-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 24px;
+    }
+
+    .serving-card {
+      background: #1C2541;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 28px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+      transition: transform 0.25s, border-color 0.25s;
+    }
+
+    .serving-card.just-called {
+      animation: flashCalled 2.5s ease-out;
+      border-color: var(--go) !important;
+    }
+
+    @keyframes flashCalled {
+      0% { transform: scale(1.04); background: #14532D; border-color: #22C55E; box-shadow: 0 0 40px rgba(34, 197, 94, 0.6); }
+      30% { transform: scale(1.02); background: #14532D; }
+      100% { transform: scale(1); background: #1C2541; }
+    }
+
+    .token-number {
+      font-family: var(--font-display);
+      font-size: 72px; /* Minimum 48px for 5m distance */
+      font-weight: 900;
+      line-height: 1;
+      color: var(--ticket);
+      letter-spacing: -1px;
+    }
+
+    .arrow-divider {
+      font-size: 40px;
+      color: #64748B;
+      font-weight: 700;
+    }
+
+    .counter-target {
+      text-align: right;
+    }
+    .counter-name {
+      font-family: var(--font-display);
+      font-size: 44px;
+      font-weight: 800;
+      line-height: 1.1;
+      color: #FFFFFF;
+    }
+    .counter-status-tag {
+      font-size: 15px;
+      font-weight: 700;
+      color: #86EFAC;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    .empty-serving-box {
+      grid-column: 1 / -1;
+      background: rgba(28, 37, 65, 0.6);
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 48px;
+      text-align: center;
+      font-size: 26px;
+      color: #94A3B8;
+      font-weight: 600;
+    }
+
+    /* Next Tokens Queue Row */
+    .next-section {
+      background: rgba(28, 37, 65, 0.5);
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 24px 32px;
+    }
+
+    .next-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .next-token-chip {
+      background: #3A506B;
+      color: #FFFFFF;
+      font-family: var(--font-display);
+      font-size: 38px;
+      font-weight: 800;
+      padding: 12px 28px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .next-token-sub {
+      font-size: 16px;
+      color: #CBD5E1;
+      font-weight: 600;
+      font-family: var(--font-body);
+    }
+
+    /* Footer */
+    .display-footer {
+      background: rgba(11, 19, 43, 0.95);
+      border-top: 2px solid rgba(255, 255, 255, 0.1);
+      padding: 20px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .qr-join-box {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .qr-join-image {
+      width: 72px;
+      height: 72px;
+      background: #FFFFFF;
+      padding: 4px;
+      border-radius: 8px;
+    }
+    .qr-join-text {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .qr-join-sub {
+      font-size: 15px;
+      color: #94A3B8;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .avg-wait-box {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      color: #F8FAFC;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avg-wait-number {
+      color: var(--ticket);
+      font-size: 32px;
+      font-weight: 900;
+    }
+
+    /* Audio Enable Overlay */
+    .audio-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(11, 19, 43, 0.88);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.3s;
+    }
+    .audio-overlay-content {
+      background: #1C2541;
+      border: 2px solid var(--signal);
+      border-radius: 20px;
+      padding: 36px 48px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      max-width: 500px;
+    }
+    .audio-overlay-icon {
+      font-size: 56px;
+      margin-bottom: 16px;
+    }
+    .audio-overlay-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-bottom: 8px;
+    }
+    .audio-overlay-btn {
+      margin-top: 24px;
+      background: var(--signal);
+      color: #FFFFFF;
+      border: none;
+      padding: 14px 32px;
+      border-radius: var(--r-pill);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Header Bar -->
+  <header class="display-header">
+    <div class="branch-title">
+      <span id="branchName">City Civic Center</span>
+      <span class="brand-tag">Baari Display</span>
+    </div>
+    <div class="live-clock" id="liveClock">12:00:00 PM</div>
+  </header>
+
+  <!-- 2. Main Board Content -->
+  <main class="display-main">
+    <!-- Now Serving Section -->
+    <section>
+      <div class="section-label">Now Serving</div>
+      <div class="serving-grid" id="servingGrid">
+        <div class="empty-serving-box">
+          Counters are preparing to call visitors.
+        </div>
+      </div>
+    </section>
+
+    <!-- Next Section -->
+    <section class="next-section">
+      <div class="section-label" style="font-size: 18px; margin-bottom: 12px;">Next in queue</div>
+      <div class="next-row" id="nextRow">
+        <div style="font-size: 20px; color: #94A3B8; font-weight: 600;">No one is waiting currently.</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 3. Footer Bar -->
+  <footer class="display-footer">
+    <div class="qr-join-box">
+      <img src="" id="joinQrImage" alt="Scan to join" class="qr-join-image">
+      <div>
+        <div class="qr-join-text">Scan to join queue</div>
+        <div class="qr-join-sub">Track your live turn on your phone</div>
+      </div>
+    </div>
+    <div class="avg-wait-box">
+      <span>Average wait today:</span>
+      <span class="avg-wait-number" id="avgWaitNumber">~11 min</span>
+    </div>
+  </footer>
+
+  <!-- 4. Tap to Enable Sound Overlay -->
+  <div class="audio-overlay" id="audioOverlay">
+    <div class="audio-overlay-content">
+      <div class="audio-overlay-icon">🔊</div>
+      <div class="audio-overlay-title">Tap to enable voice</div>
+      <p style="color: #94A3B8; font-size: 16px; line-height: 1.4;">
+        Browsers require a tap to activate voice calls and counter chimes.
+      </p>
+      <button type="button" class="audio-overlay-btn">Enable Sound</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/socket.js"></script>
+  <script>
+    let branchId = null;
+    let audioUnlocked = false;
+    let audioCtx = null;
+    let lastCalledCode = null;
+
+    // Parse branchId from URL (/display/:branchId or ?branchId=)
+    function resolveBranchId() {
+      const parts = window.location.pathname.split('/');
+      if (parts[1] === 'display' && parts[2]) {
+        return parts[2];
+      }
+      const params = new URLSearchParams(window.location.search);
+      return params.get('branchId') || 'demo';
+    }
+
+    branchId = resolveBranchId();
+
+    // Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').textContent = now.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Audio Context Setup
+    function unlockAudio() {
+      if (audioUnlocked) return;
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtxClass) {
+        audioCtx = new AudioCtxClass();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      }
+      // Web Speech warmup
+      if ('speechSynthesis' in window) {
+        const silent = new SpeechSynthesisUtterance('');
+        silent.volume = 0;
+        window.speechSynthesis.speak(silent);
+      }
+      audioUnlocked = true;
+      const overlay = document.getElementById('audioOverlay');
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.remove(), 300);
+      playChime();
+    }
+
+    document.getElementById('audioOverlay').addEventListener('click', unlockAudio);
+
+    // Synthesize two-tone airport/railway chime fallback
+    function playChime() {
+      if (!audioCtx) return;
+      try {
+        const now = audioCtx.currentTime;
+        const notes = [587.33, 880.00]; // D5 -> A5
+        notes.forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.16);
+
+          gain.gain.setValueAtTime(0.001, now + idx * 0.16);
+          gain.gain.exponentialRampToValueAtTime(0.3, now + idx * 0.16 + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.16 + 0.4);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start(now + idx * 0.16);
+          osc.stop(now + idx * 0.16 + 0.42);
+        });
+      } catch (e) {
+        console.warn('Chime play error:', e);
+      }
+    }
+
+    // Voice announcement using Web Speech API
+    function announceToken(tokenCode, counterName) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel(); // Cancel any ongoing speech
+
+      // Clean spoken code: e.g. "L-014" -> "L, 0, 1, 4" or "L 14"
+      const speechText = `Token ${tokenCode.replace('-', ' ')}, ${counterName}`;
+      const utterance = new SpeechSynthesisUtterance(speechText);
+      utterance.rate = 0.95;
+      utterance.pitch = 1.05;
+      utterance.lang = 'en-US';
+
+      // Slight delay so the chime finishes before speech begins
+      setTimeout(() => {
+        window.speechSynthesis.speak(utterance);
+      }, 500);
+    }
+
+    // Load display data from server
+    async function loadDisplayData() {
+      try {
+        const res = await fetch(`/api/branches/${branchId}/display`);
+        if (!res.ok) throw new Error('Failed to load display board data');
+        const data = await res.json();
+
+        // Update branch name
+        if (data.branch && data.branch.name) {
+          document.getElementById('branchName').textContent = data.branch.name;
+        }
+
+        // Update Join QR
+        if (data.qrDataUrl) {
+          document.getElementById('joinQrImage').src = data.qrDataUrl;
+        }
+
+        // Update Average wait
+        document.getElementById('avgWaitNumber').textContent = `~${data.avgWaitMin || 11} min`;
+
+        // Render Now Serving
+        renderNowServing(data.nowServing || []);
+
+        // Render Next 5
+        renderNextWaiting(data.nextWaiting || []);
+      } catch (err) {
+        console.error('Display data error:', err);
+      }
+    }
+
+    function renderNowServing(nowServing) {
+      const grid = document.getElementById('servingGrid');
+      grid.innerHTML = '';
+
+      if (nowServing.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-serving-box">
+            All counters currently idle. Next visitor will appear here.
+          </div>
+        `;
+        return;
+      }
+
+      nowServing.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'serving-card';
+        card.id = `serving-card-${item.counterNumber}`;
+
+        if (lastCalledCode === item.tokenCode) {
+          card.classList.add('just-called');
+        }
+
+        card.innerHTML = `
+          <div class="token-number num">${item.tokenCode}</div>
+          <div class="arrow-divider">➔</div>
+          <div class="counter-target">
+            <div class="counter-name">${item.counterName}</div>
+            <div class="counter-status-tag">${item.status === 'called' ? 'Please proceed' : 'Serving'}</div>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    function renderNextWaiting(nextWaiting) {
+      const row = document.getElementById('nextRow');
+      row.innerHTML = '';
+
+      if (nextWaiting.length === 0) {
+        row.innerHTML = `<div style="font-size: 20px; color: #94A3B8; font-weight: 600;">No one is waiting currently.</div>`;
+        return;
+      }
+
+      nextWaiting.forEach((item) => {
+        const chip = document.createElement('div');
+        chip.className = 'next-token-chip';
+        chip.innerHTML = `
+          <span class="num">${item.code}</span>
+          <span class="next-token-sub">${item.serviceName || item.prefix}</span>
+        `;
+        row.appendChild(chip);
+      });
+    }
+
+    // Handle token called event
+    function handleTokenCalled(data) {
+      lastCalledCode = data.code;
+      playChime();
+      announceToken(data.code, data.counterName || 'Counter');
+      loadDisplayData();
+    }
+
+    // Sockets setup
+    SocketManager.init({
+      onConnect: () => {
+        SocketManager.joinBranch(branchId);
+      },
+      onQueueUpdate: () => loadDisplayData(),
+      onCounterUpdate: () => loadDisplayData(),
+      onTokenCalled: (data) => handleTokenCalled(data)
+    });
+
+    loadDisplayData();
+  </script>
+</body>
+</html>

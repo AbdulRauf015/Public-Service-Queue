@@ -82,8 +82,10 @@ setupSockets(io);
 
 // Start the server after connecting to MongoDB
 const PORT = process.env.PORT || 3000;
+const { startNotifier } = require('./src/services/notifier');
 
 connectDB().then(() => {
+  startNotifier(io);
   server.listen(PORT, () => {
     console.log(`Baari server listening on http://localhost:${PORT}`);
   });

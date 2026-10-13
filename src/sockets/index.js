@@ -61,6 +61,12 @@ async function emitQueueUpdate(io, branchId) {
       services: serviceStats,
       timestamp: new Date().toISOString()
     });
+
+    // Check alerts immediately after queue update
+    try {
+      const { checkBranchAlerts } = require('../services/notifier');
+      checkBranchAlerts(branchId, io).catch(e => console.error('[Notifier] Check error:', e.message));
+    } catch (e) {}
   } catch (err) {
     console.error('[Socket] Error in emitQueueUpdate:', err.message);
   }
@@ -125,10 +131,25 @@ function emitCounterUpdate(io, branchId, counterId, status, currentToken) {
   });
 }
 
+/**
+ * Emit notify:alert to token room
+ */
+function emitNotifyAlert(io, publicId, level, message, extra = {}) {
+  if (!io || !publicId) return;
+  io.to(`token:${publicId}`).emit('notify:alert', {
+    publicId,
+    level,
+    message,
+    ...extra,
+    timestamp: new Date().toISOString()
+  });
+}
+
 module.exports = {
   setupSockets,
   emitQueueUpdate,
   emitTokenUpdate,
   emitTokenCalled,
-  emitCounterUpdate
+  emitCounterUpdate,
+  emitNotifyAlert
 };

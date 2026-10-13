@@ -5,6 +5,7 @@ const router = express.Router();
 const { Branch, Service, Counter, Token, QueueEvent, Sequence } = require('../models');
 const { getDayKey, generatePublicId } = require('../utils/helpers');
 const { getEstimate, getServiceEstimate } = require('../services/waitTime');
+const { emitQueueUpdate } = require('../sockets');
 
 /**
  * Helper to determine busy level from waiting token count
@@ -16,6 +17,8 @@ function calculateBusyLevel(totalWaiting) {
   return { label: 'Very busy', level: 4 };
 }
 
+const QRCode = require('qrcode');
+
 /**
  * GET /api/branches/demo
  * Returns the demo branch ID
@@ -26,6 +29,87 @@ router.get('/branches/demo', async (req, res) => {
     if (!branch) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Demo branch not found' } });
     res.json({ branchId: branch._id });
   } catch (err) {
+    res.status(500).json({ error: { code: 'SERVER_ERROR', message: err.message } });
+  }
+});
+
+/**
+ * GET /api/branches/:branchId/display
+ * Returns full live data for TV Display Board (Now Serving, Next 5, Average Wait, Join QR)
+ */
+router.get('/branches/:branchId/display', async (req, res) => {
+  try {
+    let { branchId } = req.params;
+    let branch = null;
+    if (branchId === 'demo') {
+      branch = (await Branch.findOne({ isDemo: true })) || (await Branch.findOne());
+    } else {
+      branch = await Branch.findById(branchId);
+    }
+    if (!branch) {
+      return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Branch not found' } });
+    }
+
+    branchId = branch._id;
+
+    // 1. Now Serving counters
+    const counters = await Counter.find({ branchId, status: { $in: ['open', 'break'] } })
+      .populate({
+        path: 'currentTokenId',
+        select: 'code number status priorityType serviceId calledAt servingStartedAt'
+      })
+      .sort({ number: 1 });
+
+    const nowServing = counters
+      .filter(c => c.currentTokenId && ['called', 'serving'].includes(c.currentTokenId.status))
+      .map(c => ({
+        counterId: c._id,
+        counterNumber: c.number,
+        counterName: c.name,
+        tokenCode: c.currentTokenId.code,
+        status: c.currentTokenId.status
+      }));
+
+    // 2. Next five waiting tokens
+    const nextWaiting = await Token.find({ branchId, status: 'waiting' })
+      .select('code number serviceId priorityType effectiveTime')
+      .populate('serviceId', 'name prefix')
+      .sort({ effectiveTime: 1 })
+      .limit(5);
+
+    // 3. Average wait estimate
+    const services = await Service.find({ branchId, isActive: true });
+    let totalEstSec = 0;
+    let activeSvcCount = 0;
+    for (const s of services) {
+      const est = await getServiceEstimate(branchId, s._id);
+      if (est && est.estimateSec) {
+        totalEstSec += est.estimateSec;
+        activeSvcCount++;
+      }
+    }
+    const avgWaitMin = activeSvcCount > 0 ? Math.round((totalEstSec / activeSvcCount) / 60) : 11;
+
+    // 4. Generate Join QR code
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const joinUrl = `${baseUrl}/q/${branchId}`;
+    const qrDataUrl = await QRCode.toDataURL(joinUrl, { width: 180, margin: 1 });
+
+    res.json({
+      branch: { _id: branch._id, name: branch.name, type: branch.type },
+      nowServing,
+      nextWaiting: nextWaiting.map(t => ({
+        _id: t._id,
+        code: t.code,
+        serviceName: t.serviceId ? t.serviceId.name : '',
+        prefix: t.serviceId ? t.serviceId.prefix : ''
+      })),
+      avgWaitMin,
+      qrDataUrl,
+      joinUrl
+    });
+  } catch (err) {
+    console.error('Error fetching display data:', err);
     res.status(500).json({ error: { code: 'SERVER_ERROR', message: err.message } });
   }
 });
@@ -180,12 +264,7 @@ router.post('/tokens', async (req, res) => {
     // Emit real-time events if Socket.IO is initialized
     const io = req.app.get('io');
     if (io) {
-      io.to(`branch:${branchId}`).emit('queue:updated', {
-        branchId,
-        serviceId,
-        change: 'token_joined',
-        tokenCode: code
-      });
+      emitQueueUpdate(io, branchId);
     }
 
     res.status(201).json({ token });

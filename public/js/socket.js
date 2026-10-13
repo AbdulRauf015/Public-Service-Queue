@@ -49,6 +49,9 @@ function createSocketManager() {
     if (options.onCounterUpdate) {
       socket.on('counter:updated', options.onCounterUpdate);
     }
+    if (options.onNotifyAlert) {
+      socket.on('notify:alert', options.onNotifyAlert);
+    }
 
     return socket;
   }
