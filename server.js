@@ -32,6 +32,9 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static frontend files from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
 
+// API routes
+const publicRoutes = require('./src/routes/public');
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
@@ -40,6 +43,9 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// Mount public routes
+app.use('/api', publicRoutes);
 
 // Basic Socket.IO connection listener
 io.on('connection', (socket) => {
