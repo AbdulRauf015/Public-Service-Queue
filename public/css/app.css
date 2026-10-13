@@ -1,0 +1,503 @@
+/* public/css/app.css */
+/* Application layout and UI components matching UI-UX.md */
+
+* {
+  box-sizing: border-box;
+}
+
+.page-wrapper {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 16px 16px 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header & Top Bar */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.brand-logo {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--ink);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lang-switch {
+  display: flex;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 3px;
+  gap: 2px;
+}
+
+.lang-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lang-btn.active {
+  background: var(--ink);
+  color: #FFFFFF;
+}
+
+/* Hero Section */
+.hero-title {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0 0 4px;
+  letter-spacing: -0.5px;
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  color: var(--muted);
+  margin: 0 0 20px;
+}
+
+/* Branch Card */
+.branch-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.branch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.branch-name {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.demo-badge {
+  background: #E2E8F0;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.busy-meter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.busy-bars {
+  display: flex;
+  gap: 4px;
+}
+
+.busy-bar {
+  width: 14px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+.busy-bar.active-1 { background: var(--go); }
+.busy-bar.active-2 { background: var(--signal); }
+.busy-bar.active-3 { background: var(--hold); }
+.busy-bar.active-4 { background: var(--flag); }
+
+/* Form Elements */
+.section-label {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  margin: 0 0 10px;
+  display: block;
+}
+
+.service-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.service-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: 14px 16px;
+  cursor: pointer;
+  min-height: 52px; /* Touch target >= 44px */
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.service-option:hover {
+  border-color: #94A3B8;
+}
+
+.service-option.selected {
+  border-color: var(--signal);
+  background: #F8FAFC;
+}
+
+.service-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.radio-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.service-option.selected .radio-dot {
+  border-color: var(--signal);
+}
+
+.service-option.selected .radio-dot::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--signal);
+}
+
+.service-title {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.service-estimate {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Secondary Inputs */
+.input-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.form-field {
+  margin-bottom: 14px;
+}
+
+.form-field:last-child {
+  margin-bottom: 0;
+}
+
+.field-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.field-subtext {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.custom-select,
+.custom-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--ink);
+  background: #FFFFFF;
+  min-height: 48px; /* Touch target >= 44px */
+}
+
+/* Primary Button */
+.btn-primary {
+  width: 100%;
+  background: var(--signal);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--r-pill);
+  font-size: 17px;
+  font-weight: 700;
+  padding: 16px;
+  cursor: pointer;
+  min-height: 52px;
+  box-shadow: 0 4px 14px rgba(47, 91, 234, 0.3);
+  transition: transform 0.1s, opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  width: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-pill);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 16px;
+  cursor: pointer;
+  min-height: 46px;
+}
+
+/* Ticket Details Screen Elements */
+.ticket-container {
+  margin-bottom: 20px;
+}
+
+.ticket-header-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.ticket-code {
+  font-family: var(--font-display);
+  font-size: 80px;
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -2px;
+  margin: 6px 0 12px;
+}
+
+.ticket-state-msg {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 0 6px;
+}
+
+.ticket-estimate-range {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.ticket-confidence-chip {
+  display: inline-block;
+  background: rgba(20, 33, 61, 0.1);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.ticket.is-turn .ticket-confidence-chip {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Alert Notification Banner on Token Page */
+.banner {
+  padding: 12px 14px;
+  border-radius: var(--r-panel);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.banner-leave { background: #DBEAFE; color: #1E40AF; border-left: 4px solid var(--signal); }
+.banner-almost { background: #FEF3C7; color: #92400E; border-left: 4px solid var(--hold); }
+.banner-turn { background: #DCFCE7; color: #14532D; border-left: 4px solid var(--go); }
+
+/* Queue Lane */
+.queue-lane-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.queue-lane-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.queue-lane-track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 4px;
+}
+
+.lane-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--line);
+  flex-shrink: 0;
+  transition: transform 0.3s ease, background 0.3s ease;
+  position: relative;
+}
+
+.lane-dot.is-you {
+  width: 26px;
+  height: 26px;
+  background: var(--signal);
+  box-shadow: 0 0 0 4px rgba(47, 91, 234, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.lane-dot.is-priority {
+  background: var(--ticket);
+  border: 2px solid var(--ink);
+}
+
+.lane-counter-desk {
+  background: var(--ink);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* Travel time update block */
+.travel-updater {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.travel-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.travel-input {
+  width: 80px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.btn-sm {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+/* Actions Row */
+.action-buttons-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Honest Note */
+.honest-note {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.4;
+  margin-top: auto;
+  padding: 12px 0 0;
+}
+
+/* Offline Chip */
+.reconnecting-chip {
+  display: none;
+  background: var(--flag);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+/* Grace timer countdown for called state */
+.grace-timer {
+  font-size: 14px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-top: 8px;
+}

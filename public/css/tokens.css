@@ -1,0 +1,149 @@
+/* public/css/tokens.css */
+/* Core Design Tokens matching Baari UI-UX.md section 2 */
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800;900&family=Figtree:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
+
+:root {
+  /* Color Tokens */
+  --ink: #14213D;       /* Text, headings, primary elements */
+  --mist: #EEF2F8;      /* Cool mist-blue page background */
+  --paper: #FFFFFF;     /* Panels, cards, and inputs */
+  --signal: #2F5BEA;    /* Primary buttons, focus ring, user dot */
+  --ticket: #FFD23F;    /* Ticket stub only & priority markers */
+  --go: #14A37F;        /* Your turn, completed, counter open */
+  --flag: #D9462F;      /* No-show, error, counter closed */
+  --hold: #E0A100;      /* Paused counter, learning confidence */
+  --muted: #5B6785;     /* Secondary contrast text */
+  --line: #D5DCEA;      /* 1px flat borders */
+
+  /* Radius Tokens */
+  --r-panel: 8px;
+  --r-input: 10px;
+  --r-ticket: 14px;
+  --r-pill: 9999px;
+
+  /* Typography Tokens */
+  --font-display: 'Archivo', system-ui, -apple-system, sans-serif;
+  --font-body: 'Figtree', system-ui, -apple-system, sans-serif;
+
+  /* Elevation */
+  --ticket-shadow: 0 10px 24px rgba(20, 33, 61, 0.18);
+  --card-shadow: 0 2px 8px rgba(20, 33, 61, 0.04);
+}
+
+/* RTL and Language Typography overrides */
+html[lang="ur"] {
+  --font-body: 'Noto Nastaliq Urdu', serif;
+  line-height: 2;
+}
+
+html[lang="sd"] {
+  --font-body: 'Noto Naskh Arabic', serif;
+  line-height: 1.8;
+}
+
+body {
+  background: var(--mist);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Number display with tabular figures */
+.num {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Accessible visible focus ring */
+:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: 2px;
+}
+
+/* Perforated Tactile Ticket with side notches */
+.ticket {
+  background: var(--ticket);
+  color: var(--ink);
+  border-radius: var(--r-ticket);
+  padding: 24px 20px 20px;
+  position: relative;
+  box-shadow: var(--ticket-shadow);
+  -webkit-mask:
+    radial-gradient(circle 12px at 0 60%, #0000 98%, #000) left/51% 100% no-repeat,
+    radial-gradient(circle 12px at 100% 60%, #0000 98%, #000) right/51% 100% no-repeat;
+  mask:
+    radial-gradient(circle 12px at 0 60%, #0000 98%, #000) left/51% 100% no-repeat,
+    radial-gradient(circle 12px at 100% 60%, #0000 98%, #000) right/51% 100% no-repeat;
+  transition: background 0.4s ease, color 0.4s ease, transform 0.3s ease;
+}
+
+/* Perforated divider line */
+.ticket .perf {
+  border-top: 2px dashed rgba(20, 33, 61, 0.35);
+  margin: 16px 0;
+}
+
+/* Ticket in 'Your turn' (called) state */
+.ticket.is-turn {
+  background: var(--go) !important;
+  color: #FFFFFF !important;
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+.ticket.is-turn .perf {
+  border-top-color: rgba(255, 255, 255, 0.4);
+}
+
+.ticket.is-turn .ticket-subtitle,
+.ticket.is-turn .ticket-meta {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Other Ticket States */
+.ticket.is-serving {
+  background: var(--go);
+  color: #FFFFFF;
+}
+
+.ticket.is-done {
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--line);
+}
+
+.ticket.is-noshow,
+.ticket.is-cancelled {
+  background: #CBD5E1;
+  color: #475569;
+}
+
+/* Print animation on ticket creation */
+@media (prefers-reduced-motion: no-preference) {
+  .ticket.printing {
+    animation: print 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  @keyframes print {
+    from {
+      transform: translateY(-40px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 10px 24px rgba(20, 163, 127, 0.25);
+    }
+    50% {
+      box-shadow: 0 14px 32px rgba(20, 163, 127, 0.5);
+    }
+  }
+}

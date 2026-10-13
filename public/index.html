@@ -1,57 +1,220 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Baari - Smart Queue & Wait-Time Optimizer</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #EEF2F8;
-      color: #14213D;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      text-align: center;
-      padding: 20px;
-    }
-    .card {
-      background: #FFFFFF;
-      padding: 32px;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(20, 33, 61, 0.08);
-      max-width: 480px;
-      width: 100%;
-    }
-    h1 {
-      margin: 0 0 12px;
-      font-size: 28px;
-    }
-    p {
-      color: #5B6785;
-      font-size: 16px;
-      line-height: 1.5;
-    }
-    .badge {
-      display: inline-block;
-      background: #FFD23F;
-      color: #14213D;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-weight: 600;
-      font-size: 14px;
-      margin-top: 16px;
-    }
-  </style>
+  <title>Baari · Skip the line. Keep your turn.</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
-  <div class="card">
-    <h1>Baari (باری)</h1>
-    <p>Wait anywhere. Be there when it's your baari.</p>
-    <div class="badge">Stage 1 Setup Active</div>
+  <div class="page-wrapper">
+    <!-- Top Navigation -->
+    <header class="top-nav">
+      <a href="/" class="brand-logo">
+        <span>Baari</span>
+        <span style="font-size: 16px; color: var(--muted); font-weight: 500;">باری</span>
+      </a>
+      <div class="lang-switch" role="group" aria-label="Language selection">
+        <button type="button" class="lang-btn active" data-lang="en">EN</button>
+        <button type="button" class="lang-btn" data-lang="ur">اردو</button>
+        <button type="button" class="lang-btn" data-lang="sd">سنڌي</button>
+      </div>
+    </header>
+
+    <!-- Hero Title -->
+    <main>
+      <h1 class="hero-title">Skip the line.<br>Keep your turn.</h1>
+      <p class="hero-subtitle">Get a digital token and wait from anywhere.</p>
+
+      <!-- Branch Status Card -->
+      <section class="branch-card" aria-labelledby="branchHeading">
+        <div class="branch-header">
+          <h2 id="branchHeading" class="branch-name" id="branchName">City Civic Center</h2>
+          <span class="demo-badge">demo data</span>
+        </div>
+        <div class="busy-meter">
+          <span>Busy now:</span>
+          <div class="busy-bars" id="busyBars" aria-label="Busy meter indicator">
+            <span class="busy-bar active-1"></span>
+            <span class="busy-bar active-2"></span>
+            <span class="busy-bar"></span>
+            <span class="busy-bar"></span>
+          </div>
+          <strong id="busyLabel" style="color: var(--ink);">Moderate</strong>
+        </div>
+      </section>
+
+      <!-- Token Creation Form -->
+      <form id="joinForm">
+        <span class="section-label">What do you need?</span>
+        <div class="service-group" id="servicesList" role="radiogroup" aria-label="Select a service">
+          <!-- Dynamic Services will populate here -->
+          <div style="padding: 16px; text-align: center; color: var(--muted); background: var(--paper); border-radius: var(--r-panel);">
+            Loading services...
+          </div>
+        </div>
+
+        <div class="input-card">
+          <!-- Priority Selector -->
+          <div class="form-field">
+            <label for="prioritySelect" class="field-label">Need priority assistance?</label>
+            <select id="prioritySelect" class="custom-select">
+              <option value="normal">None (Standard queue)</option>
+              <option value="senior">Senior citizen (+20 min bonus)</option>
+              <option value="pregnant">Pregnant (+20 min bonus)</option>
+              <option value="disabled">Disabled (+30 min bonus)</option>
+              <option value="emergency">Emergency (+120 min bonus)</option>
+            </select>
+            <div class="field-subtext">Staff will verify priority eligibility at the counter.</div>
+          </div>
+
+          <!-- Travel Time Input -->
+          <div class="form-field" style="margin-top: 14px;">
+            <label for="travelMinutesInput" class="field-label">How far away are you? (minutes)</label>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input type="number" id="travelMinutesInput" class="custom-input" placeholder="e.g. 20" min="0" max="180">
+              <span style="font-weight: 600; color: var(--muted);">min</span>
+            </div>
+            <div class="field-subtext">Optional. We will notify you with "Leave now" so you arrive just in time.</div>
+          </div>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn-primary">
+          <span>Get my token</span>
+        </button>
+      </form>
+    </main>
+
+    <!-- Footer Note -->
+    <footer class="honest-note">
+      <div id="bestTimeHint" style="font-weight: 600; color: var(--ink); margin-bottom: 4px;">
+        Quietest time today: 2:00 PM to 3:00 PM
+      </div>
+      <div>Estimates update live. They are not promises.</div>
+    </footer>
   </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/socket.js"></script>
+  <script>
+    let currentBranchId = null;
+    let selectedServiceId = null;
+
+    // Detect branch from URL path (/q/:branchId) or fetch demo
+    async function initJoinPage() {
+      try {
+        const pathParts = window.location.pathname.split('/');
+        if (pathParts[1] === 'q' && pathParts[2]) {
+          currentBranchId = pathParts[2];
+        } else {
+          const demo = await API.getDemoBranch();
+          currentBranchId = demo.branchId;
+        }
+
+        await loadBranchData(currentBranchId);
+
+        // Real-time updates via Socket.IO
+        SocketManager.init({
+          onConnect: () => SocketManager.joinBranch(currentBranchId),
+          onQueueUpdate: () => loadBranchData(currentBranchId)
+        });
+      } catch (err) {
+        console.error('Failed to initialize join page:', err);
+      }
+    }
+
+    async function loadBranchData(branchId) {
+      try {
+        const data = await API.getBranchPublic(branchId);
+        document.getElementById('branchHeading').textContent = data.branch.name;
+
+        // Render busy meter
+        const busyLabel = document.getElementById('busyLabel');
+        const busyBars = document.getElementById('busyBars');
+        busyLabel.textContent = data.busyLevel;
+
+        const score = data.busyScore || 2;
+        busyBars.innerHTML = '';
+        for (let i = 1; i <= 4; i++) {
+          const bar = document.createElement('span');
+          bar.className = `busy-bar ${i <= score ? `active-${score}` : ''}`;
+          busyBars.appendChild(bar);
+        }
+
+        // Render services list
+        const container = document.getElementById('servicesList');
+        container.innerHTML = '';
+
+        data.services.forEach((svc, index) => {
+          const isSelected = selectedServiceId === svc._id || (!selectedServiceId && index === 0);
+          if (isSelected) selectedServiceId = svc._id;
+
+          const row = document.createElement('div');
+          row.className = `service-option ${isSelected ? 'selected' : ''}`;
+          row.role = 'radio';
+          row.tabIndex = 0;
+          row.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+          row.dataset.id = svc._id;
+
+          const waitMin = svc.estimateSec !== null ? Math.round(svc.estimateSec / 60) : null;
+          const waitText = waitMin !== null ? `~${waitMin} min` : 'No open counter';
+
+          row.innerHTML = `
+            <div class="service-left">
+              <span class="radio-dot"></span>
+              <span class="service-title">${svc.name}</span>
+            </div>
+            <span class="service-estimate">${waitText}</span>
+          `;
+
+          row.addEventListener('click', () => {
+            document.querySelectorAll('.service-option').forEach(el => {
+              el.classList.remove('selected');
+              el.setAttribute('aria-checked', 'false');
+            });
+            row.classList.add('selected');
+            row.setAttribute('aria-checked', 'true');
+            selectedServiceId = svc._id;
+          });
+
+          container.appendChild(row);
+        });
+      } catch (err) {
+        console.error('Error loading branch:', err);
+      }
+    }
+
+    // Submit form to create token
+    document.getElementById('joinForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Printing ticket...</span>';
+
+      try {
+        const priorityType = document.getElementById('prioritySelect').value;
+        const travelMinutes = document.getElementById('travelMinutesInput').value;
+
+        const token = await API.createToken({
+          branchId: currentBranchId,
+          serviceId: selectedServiceId,
+          priorityType,
+          travelMinutes: travelMinutes ? Number(travelMinutes) : null,
+          channel: 'web'
+        });
+
+        // Redirect to hero token screen
+        window.location.href = `/t/${token.publicId}`;
+      } catch (err) {
+        alert(err.message || 'Error creating token. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Get my token</span>';
+      }
+    });
+
+    initJoinPage();
+  </script>
 </body>
 </html>

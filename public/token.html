@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Token · Baari</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <!-- Reconnecting chip for offline resilience -->
+    <div id="reconnectingChip" class="reconnecting-chip" role="status">
+      Reconnecting to queue...
+    </div>
+
+    <!-- Top Navigation -->
+    <header class="top-nav">
+      <a href="/" class="brand-logo">
+        <span>Baari</span>
+        <span style="font-size: 16px; color: var(--muted); font-weight: 500;">باری</span>
+      </a>
+      <div id="serviceBadge" style="font-size: 14px; font-weight: 700; color: var(--muted);">
+        Loading...
+      </div>
+    </header>
+
+    <main>
+      <!-- Live Alert Banner (Leave now / Almost / Called) -->
+      <div id="alertBanner" style="display: none;" class="banner" role="alert">
+        <span id="bannerText"></span>
+      </div>
+
+      <!-- The Tactile Perforated Ticket Stub (Hero element) -->
+      <div class="ticket-container">
+        <article id="ticketStub" class="ticket printing" aria-live="polite">
+          <div class="ticket-header-label">Your token</div>
+          <div class="ticket-code num" id="ticketCode">---</div>
+          
+          <div class="perf" aria-hidden="true"></div>
+
+          <div id="ticketStateMsg" class="ticket-state-msg">Calculating queue...</div>
+          <div id="ticketEstimateRange" class="ticket-estimate-range"></div>
+          <div>
+            <span id="ticketConfidence" class="ticket-confidence-chip">Learning</span>
+          </div>
+
+          <!-- Called state: I'm here button & grace timer -->
+          <div id="calledActions" style="display: none; margin-top: 16px;">
+            <button type="button" id="imHereBtn" class="btn-primary" style="background: #FFFFFF; color: var(--go); box-shadow: none;">
+              I'm here
+            </button>
+            <div style="text-align: center;">
+              <span id="graceTimerBadge" class="grace-timer">Arrive within: 90s</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Queue Lane -->
+      <section class="queue-lane-card" aria-labelledby="queueLaneTitle">
+        <div class="queue-lane-title" id="queueLaneTitle">
+          <span>Queue Lane</span>
+          <span id="queueAheadLabel" style="font-weight: 600; color: var(--ink);">0 ahead</span>
+        </div>
+        <div class="queue-lane-track" id="queueLaneTrack" aria-label="Visual queue lane">
+          <!-- Person dots render dynamically here -->
+        </div>
+      </section>
+
+      <!-- Travel Time Updater -->
+      <section class="travel-updater">
+        <div style="font-weight: 600; margin-bottom: 4px;">Smart Leave Alert</div>
+        <div style="color: var(--muted); font-size: 13px;">Tell us how far you are so we can warn you when to leave.</div>
+        <div class="travel-row">
+          <span>I am</span>
+          <input type="number" id="travelInput" class="travel-input" placeholder="min" min="0" max="180">
+          <span>min away</span>
+          <button type="button" id="updateTravelBtn" class="btn-sm">Update</button>
+        </div>
+        <div id="leaveGuidance" style="font-size: 13px; color: var(--signal); font-weight: 600; margin-top: 8px;"></div>
+      </section>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons-row">
+        <button type="button" id="shareBtn" class="btn-secondary">
+          Share link
+        </button>
+        <button type="button" id="cancelBtn" class="btn-secondary" style="color: var(--flag); border-color: #FECACA;">
+          Cancel token
+        </button>
+      </div>
+    </main>
+
+    <!-- Honest Note -->
+    <footer class="honest-note">
+      <div>Estimates update live. They are not promises.</div>
+    </footer>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/socket.js"></script>
+  <script>
+    let publicId = null;
+    let currentToken = null;
+    let graceCountdownInterval = null;
+
+    // Extract publicId from /t/:publicId or query param
+    function getPublicId() {
+      const parts = window.location.pathname.split('/');
+      if (parts[1] === 't' && parts[2]) {
+        return parts[2];
+      }
+      const params = new URLSearchParams(window.location.search);
+      return params.get('id');
+    }
+
+    async function initTokenPage() {
+      publicId = getPublicId();
+      if (!publicId) {
+        alert('Invalid token URL');
+        window.location.href = '/';
+        return;
+      }
+
+      await loadTokenDetails();
+
+      // Initialize Socket.IO connection
+      SocketManager.init({
+        onConnect: () => {
+          document.getElementById('reconnectingChip').style.display = 'none';
+          SocketManager.joinToken(publicId);
+          if (currentToken && currentToken.branchId) {
+            SocketManager.joinBranch(currentToken.branchId);
+          }
+        },
+        onDisconnect: () => {
+          document.getElementById('reconnectingChip').style.display = 'block';
+        },
+        onPoll: () => loadTokenDetails(),
+        onTokenUpdate: (data) => {
+          renderTokenData(data.token, data);
+        },
+        onTokenCalled: (data) => {
+          if (data.publicId === publicId) {
+            loadTokenDetails();
+          }
+        },
+        onQueueUpdate: () => loadTokenDetails()
+      });
+    }
+
+    async function loadTokenDetails() {
+      try {
+        const data = await API.getToken(publicId);
+        currentToken = data.token;
+        renderTokenData(data.token, data.queue);
+      } catch (err) {
+        console.error('Error fetching token:', err);
+      }
+    }
+
+    function renderTokenData(token, queue) {
+      if (!token) return;
+
+      // Update page title with code and ahead
+      const aheadCount = queue ? queue.ahead : 0;
+      document.title = `${token.code} · ${aheadCount} ahead | Baari`;
+
+      // Header Service Badge
+      const serviceName = token.serviceId ? token.serviceId.name : 'Queue';
+      document.getElementById('serviceBadge').textContent = serviceName;
+
+      // Ticket Elements
+      const ticketStub = document.getElementById('ticketStub');
+      const ticketCode = document.getElementById('ticketCode');
+      const stateMsg = document.getElementById('ticketStateMsg');
+      const estimateRange = document.getElementById('ticketEstimateRange');
+      const confidence = document.getElementById('ticketConfidence');
+      const calledActions = document.getElementById('calledActions');
+      const alertBanner = document.getElementById('alertBanner');
+      const bannerText = document.getElementById('bannerText');
+
+      ticketCode.textContent = token.code;
+      document.getElementById('queueAheadLabel').textContent = `${aheadCount} ahead`;
+
+      // Confidence label
+      confidence.textContent = queue && queue.confidence ? `Confidence: ${queue.confidence}` : 'Confidence: Learning';
+
+      // Reset state classes
+      ticketStub.className = 'ticket';
+      calledActions.style.display = 'none';
+      alertBanner.style.display = 'none';
+
+      // State-specific rendering
+      if (token.status === 'called') {
+        ticketStub.classList.add('is-turn');
+        const counterName = token.counterId ? token.counterId.name : 'Counter';
+        stateMsg.textContent = `Your turn! Go to ${counterName}`;
+        estimateRange.textContent = 'Please proceed immediately';
+
+        alertBanner.className = 'banner banner-turn';
+        bannerText.textContent = `Your turn! Please proceed to ${counterName}.`;
+        alertBanner.style.display = 'flex';
+
+        calledActions.style.display = 'block';
+        startGraceCountdown(token.calledAt);
+      } else if (token.status === 'serving') {
+        ticketStub.classList.add('is-serving');
+        stateMsg.textContent = 'Being served';
+        estimateRange.textContent = token.counterId ? `At ${token.counterId.name}` : 'At counter';
+      } else if (token.status === 'completed') {
+        ticketStub.classList.add('is-done');
+        stateMsg.textContent = 'Completed';
+        estimateRange.textContent = 'Thank you for your visit!';
+      } else if (token.status === 'no_show') {
+        ticketStub.classList.add('is-noshow');
+        stateMsg.textContent = 'Missed your turn';
+        estimateRange.textContent = 'Please ask staff if a recall is available.';
+      } else if (token.status === 'cancelled') {
+        ticketStub.classList.add('is-cancelled');
+        stateMsg.textContent = 'Token cancelled';
+        estimateRange.textContent = 'You can get a new token anytime.';
+      } else {
+        // Status: waiting
+        if (queue && queue.openCounters === 0) {
+          stateMsg.textContent = 'No counter open right now';
+          estimateRange.textContent = 'We will update you as soon as a counter opens.';
+        } else {
+          stateMsg.textContent = `${aheadCount} people ahead`;
+          if (queue && queue.range) {
+            const lowMin = Math.round(queue.range.low / 60);
+            const highMin = Math.round(queue.range.high / 60);
+            estimateRange.textContent = `Estimated wait ${lowMin} to ${highMin} min`;
+          } else {
+            estimateRange.textContent = 'Estimating wait time...';
+          }
+
+          // Check if Almost your turn (ahead <= 3)
+          if (aheadCount <= 3 && aheadCount > 0) {
+            alertBanner.className = 'banner banner-almost';
+            bannerText.textContent = `Almost your turn! Only ${aheadCount} ahead.`;
+            alertBanner.style.display = 'flex';
+          }
+        }
+      }
+
+      // Render Queue Lane
+      renderQueueLane(aheadCount, token.code, token.priorityType !== 'normal');
+
+      // Populate Travel Time
+      if (token.travelMinutes !== null && token.travelMinutes !== undefined) {
+        document.getElementById('travelInput').value = token.travelMinutes;
+        renderLeaveGuidance(token.travelMinutes, queue ? queue.estimateSec : null);
+      }
+    }
+
+    function renderQueueLane(ahead, myCode, isPriority) {
+      const track = document.getElementById('queueLaneTrack');
+      track.innerHTML = '';
+
+      const maxDots = Math.min(12, ahead);
+
+      for (let i = 0; i < maxDots; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'lane-dot';
+        track.appendChild(dot);
+      }
+
+      // Your dot
+      const you = document.createElement('span');
+      you.className = 'lane-dot is-you';
+      you.textContent = 'You';
+      track.appendChild(you);
+
+      // Remaining path dots
+      for (let j = 0; j < 3; j++) {
+        const dot = document.createElement('span');
+        dot.className = 'lane-dot';
+        dot.style.opacity = '0.4';
+        track.appendChild(dot);
+      }
+
+      // Counter desk icon
+      const desk = document.createElement('span');
+      desk.className = 'lane-counter-desk';
+      desk.textContent = 'Desk';
+      track.appendChild(desk);
+    }
+
+    function renderLeaveGuidance(travelMin, estimateSec) {
+      const guidance = document.getElementById('leaveGuidance');
+      if (!estimateSec) {
+        guidance.textContent = '';
+        return;
+      }
+      const estMin = Math.round(estimateSec / 60);
+      const diff = estMin - travelMin;
+
+      if (diff <= 5 && diff >= 0) {
+        guidance.textContent = 'Time to leave now to arrive just in time!';
+        guidance.style.color = 'var(--go)';
+      } else if (diff > 5) {
+        guidance.textContent = `We will suggest leaving in ~${diff - 5} minutes.`;
+        guidance.style.color = 'var(--signal)';
+      } else {
+        guidance.textContent = 'Please head to the counter as soon as possible.';
+        guidance.style.color = 'var(--flag)';
+      }
+    }
+
+    function startGraceCountdown(calledAt) {
+      if (graceCountdownInterval) clearInterval(graceCountdownInterval);
+      const badge = document.getElementById('graceTimerBadge');
+      const graceTotalSec = 90;
+      const start = calledAt ? new Date(calledAt).getTime() : Date.now();
+
+      function update() {
+        const elapsed = Math.floor((Date.now() - start) / 1000);
+        const left = Math.max(0, graceTotalSec - elapsed);
+        badge.textContent = `Arrive within: ${left}s`;
+        if (left === 0) {
+          clearInterval(graceCountdownInterval);
+          badge.textContent = 'Grace period ended';
+        }
+      }
+      update();
+      graceCountdownInterval = setInterval(update, 1000);
+    }
+
+    // "I'm here" confirmation
+    document.getElementById('imHereBtn').addEventListener('click', async () => {
+      try {
+        await API.confirmArrival(publicId);
+        document.getElementById('imHereBtn').disabled = true;
+        document.getElementById('imHereBtn').textContent = 'Arrival Confirmed ✓';
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    // Update Travel Time
+    document.getElementById('updateTravelBtn').addEventListener('click', async () => {
+      const val = document.getElementById('travelInput').value;
+      try {
+        await API.updateToken(publicId, { travelMinutes: val ? Number(val) : null });
+        loadTokenDetails();
+      } catch (err) {
+        alert('Could not update travel time');
+      }
+    });
+
+    // Share link
+    document.getElementById('shareBtn').addEventListener('click', () => {
+      if (navigator.share) {
+        navigator.share({
+          title: `My Baari Token (${currentToken ? currentToken.code : ''})`,
+          url: window.location.href
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      }
+    });
+
+    // Cancel token
+    document.getElementById('cancelBtn').addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to cancel your token?')) return;
+      try {
+        await API.cancelToken(publicId);
+        loadTokenDetails();
+      } catch (err) {
+        alert(err.message || 'Could not cancel token');
+      }
+    });
+
+    initTokenPage();
+  </script>
+</body>
+</html>

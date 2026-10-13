@@ -19,7 +19,9 @@ async function callNext(counterId, staffId = null, io = null) {
     throw new Error('Counter not found');
   }
   if (counter.status !== 'open') {
-    throw new Error(`Counter is ${counter.status}. Open counter before calling next.`);
+    const err = new Error(`Counter is ${counter.status}. Open counter before calling next.`);
+    err.code = 'COUNTER_NOT_OPEN';
+    throw err;
   }
 
   // Atomically select and claim the next waiting token

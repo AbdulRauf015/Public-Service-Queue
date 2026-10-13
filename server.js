@@ -52,6 +52,31 @@ app.use('/api/auth', authRoutes);
 app.use('/api', publicRoutes);
 app.use('/api', staffRoutes);
 
+// Frontend page routes matching UI-UX.md screen map
+app.get('/q/:branchId', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/t/:publicId', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'token.html'));
+});
+
+app.get('/staff', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'staff.html'));
+});
+
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.get('/display/:branchId', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'display.html'));
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 // Initialize Socket.IO handlers
 setupSockets(io);
 

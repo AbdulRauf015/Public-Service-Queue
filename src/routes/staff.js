@@ -133,7 +133,7 @@ router.post('/counters/:id/call-next', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Error in call-next:', error);
-    res.status(400).json({ error: { code: 'OPERATION_ERROR', message: error.message } });
+    res.status(400).json({ error: { code: error.code || 'OPERATION_ERROR', message: error.message } });
   }
 });
 
