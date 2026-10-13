@@ -188,7 +188,7 @@
             <span class="service-wait">${waitText}</span>
           `;
 
-          row.addEventListener('click', () => {
+          row.addEventListener('click', async () => {
             document.querySelectorAll('.service-row').forEach(el => {
               el.classList.remove('selected');
               el.setAttribute('aria-checked', 'false');
@@ -196,10 +196,29 @@
             row.classList.add('selected');
             row.setAttribute('aria-checked', 'true');
             selectedServiceId = svc._id;
+
+            try {
+              const bestTime = await API.getBestTime(branchId, selectedServiceId);
+              if (bestTime && bestTime.label) {
+                document.getElementById('bestTimeHint').textContent = `Quietest time today: ${bestTime.label}`;
+              }
+            } catch (e) {
+              console.warn('Could not load best-time for service:', e.message);
+            }
           });
 
           container.appendChild(row);
         });
+
+        // Load dynamic quietest time today hint
+        try {
+          const bestTime = await API.getBestTime(branchId, selectedServiceId);
+          if (bestTime && bestTime.label) {
+            document.getElementById('bestTimeHint').textContent = `Quietest time today: ${bestTime.label}`;
+          }
+        } catch (e) {
+          console.warn('Could not load best-time:', e.message);
+        }
       } catch (err) {
         console.error('Error loading branch:', err);
       }

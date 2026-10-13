@@ -37,6 +37,7 @@ const publicRoutes = require('./src/routes/public');
 const authRoutes = require('./src/routes/auth');
 const staffRoutes = require('./src/routes/staff');
 const simRoutes = require('./src/routes/sim');
+const analyticsRoutes = require('./src/routes/analytics');
 const { setupSockets } = require('./src/sockets');
 
 // Health check endpoint
@@ -51,6 +52,7 @@ app.get('/api/health', (req, res) => {
 // Mount API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/sim', simRoutes);
+app.use('/api/analytics', analyticsRoutes);
 app.use('/api', publicRoutes);
 app.use('/api', staffRoutes);
 

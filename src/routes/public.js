@@ -474,4 +474,36 @@ router.post('/tokens/:publicId/feedback', async (req, res) => {
   }
 });
 
+const { getBestTime } = require('../services/analytics');
+
+/**
+ * GET /api/branches/:branchId/best-time
+ * Quietest hours based on 7-day history (TRD 6.1)
+ */
+async function getBestTimeHandler(req, res) {
+  try {
+    const branchParam = req.params.branchId || req.params.id;
+    let branch = null;
+    if (branchParam === 'demo') {
+      branch = (await Branch.findOne({ isDemo: true })) || (await Branch.findOne());
+    } else {
+      branch = await Branch.findById(branchParam);
+    }
+
+    if (!branch) {
+      return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Branch not found' } });
+    }
+
+    const { serviceId } = req.query;
+    const result = await getBestTime(branch._id, { serviceId });
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching best time:', error);
+    res.status(500).json({ error: { code: 'SERVER_ERROR', message: error.message } });
+  }
+}
+
+router.get('/branches/:branchId/best-time', getBestTimeHandler);
+router.get('/branches/:id/best-time', getBestTimeHandler);
+
 module.exports = router;

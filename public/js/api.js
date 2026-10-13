@@ -66,6 +66,48 @@ const API = {
       throw new Error(data.error ? data.error.message : 'Failed to update token');
     }
     return data.token;
+  },
+
+  async getAnalyticsSummary({ branchId, range = 'today', includeSimulated = true } = {}) {
+    const params = new URLSearchParams({
+      ...(branchId ? { branchId } : {}),
+      range,
+      includeSimulated: includeSimulated ? 'true' : 'false'
+    });
+    const res = await fetch(`/api/analytics/summary?${params.toString()}`);
+    if (!res.ok) throw new Error('Failed to load analytics summary');
+    return await res.json();
+  },
+
+  async getAnalyticsHourly({ branchId, range = 'today', includeSimulated = true } = {}) {
+    const params = new URLSearchParams({
+      ...(branchId ? { branchId } : {}),
+      range,
+      includeSimulated: includeSimulated ? 'true' : 'false'
+    });
+    const res = await fetch(`/api/analytics/hourly?${params.toString()}`);
+    if (!res.ok) throw new Error('Failed to load hourly analytics');
+    return await res.json();
+  },
+
+  async getAnalyticsCounters({ branchId, range = 'today', includeSimulated = true } = {}) {
+    const params = new URLSearchParams({
+      ...(branchId ? { branchId } : {}),
+      range,
+      includeSimulated: includeSimulated ? 'true' : 'false'
+    });
+    const res = await fetch(`/api/analytics/counters?${params.toString()}`);
+    if (!res.ok) throw new Error('Failed to load counter performance');
+    return await res.json();
+  },
+
+  async getBestTime(branchId, serviceId = null) {
+    const url = serviceId
+      ? `/api/branches/${branchId}/best-time?serviceId=${serviceId}`
+      : `/api/branches/${branchId}/best-time`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Failed to load best visiting time');
+    return await res.json();
   }
 };
 

@@ -542,6 +542,43 @@
       font-size: 13px;
       cursor: pointer;
     }
+    .rush-size-picker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .rush-size-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .rush-btn-group {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+    }
+    .btn-rush-opt {
+      flex: 1;
+      background: var(--paper);
+      border: 1.5px solid var(--line);
+      border-radius: var(--r-panel);
+      padding: 6px 4px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-rush-opt:hover {
+      border-color: var(--signal);
+    }
+    .btn-rush-opt.active {
+      background: var(--signal);
+      border-color: var(--signal);
+      color: #FFFFFF;
+    }
 
     /* What-If Panel inside Drawer */
     .whatif-panel {
@@ -771,8 +808,16 @@
     <div class="demolab-body">
       <!-- Quick Simulation Triggers -->
       <div class="demolab-section">
+        <div class="rush-size-picker">
+          <span class="rush-size-label">Rush size:</span>
+          <div class="rush-btn-group" id="rushSizeGroup">
+            <button type="button" class="btn-rush-opt" data-count="5">5 people</button>
+            <button type="button" class="btn-rush-opt active" data-count="10">10 people</button>
+            <button type="button" class="btn-rush-opt" data-count="20">20 people</button>
+          </div>
+        </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <button type="button" class="btn-sim-action" id="addRushBtn">Add 20 people</button>
+          <button type="button" class="btn-sim-action" id="addRushBtn">Add 10 people</button>
           <button type="button" class="btn-sim-action outline" id="resetDemoBtn">Reset demo</button>
         </div>
       </div>
@@ -1396,16 +1441,27 @@
       labDrawer.classList.remove('open');
     });
 
-    // 1. Add 20 people rush
+    // 1. Configurable rush crowd (5, 10, 20 people, default 10)
+    let selectedRushCount = 10;
+    const rushOptButtons = document.querySelectorAll('.btn-rush-opt');
+    rushOptButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        rushOptButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedRushCount = parseInt(btn.dataset.count, 10);
+        document.getElementById('addRushBtn').textContent = `Add ${selectedRushCount} people`;
+      });
+    });
+
     document.getElementById('addRushBtn').addEventListener('click', async () => {
       try {
         const res = await fetch('/api/sim/rush', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ branchId, count: 20 })
+          body: JSON.stringify({ branchId, count: selectedRushCount })
         });
         const data = await res.json();
-        showToast(`Added 20 people (${data.firstCode} to ${data.lastCode})`);
+        showToast(`Added ${selectedRushCount} people (${data.firstCode} to ${data.lastCode})`);
         loadDashboard();
       } catch (err) {
         showToast(err.message);

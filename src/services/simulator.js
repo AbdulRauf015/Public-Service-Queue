@@ -205,7 +205,112 @@ function toggleAutoServe(branchId, enabled = null, io = null) {
 }
 
 /**
- * 5. Reset Demo: Clear simulated tokens and restore initial clean queue state
+ * Helper to reseed today's clean starter queue
+ * 11 Lab tokens (waits ~21 min with 2 counters, ~42 min with 1 counter),
+ * 3 Registration tokens, 2 Pharmacy tokens.
+ */
+async function reseedTodayStarterQueue(branchId) {
+  const todayKey = getDayKey();
+
+  // 1. Delete all tokens and queue events for today
+  await Token.deleteMany({ branchId, dayKey: todayKey });
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  await QueueEvent.deleteMany({ branchId, at: { $gte: startOfDay } });
+
+  // 2. Clear sequence counters for today
+  await Sequence.deleteMany({ key: { $regex: `:${todayKey}$` } });
+
+  // 3. Find services and restore initial learned EMAs
+  const regService = await Service.findOne({ branchId, prefix: 'R' });
+  const labService = await Service.findOne({ branchId, prefix: 'L' });
+  const pharmService = await Service.findOne({ branchId, prefix: 'P' });
+  if (!regService || !labService || !pharmService) return;
+
+  regService.emaServiceSec = 145;
+  regService.sampleCount = 22;
+  await regService.save();
+
+  labService.emaServiceSec = 230;
+  labService.sampleCount = 24;
+  await labService.save();
+
+  pharmService.emaServiceSec = 85;
+  pharmService.sampleCount = 26;
+  await pharmService.save();
+
+  const starterTokens = [
+    // Registration (3 tokens)
+    { svc: regService, priority: 'normal', name: 'Zubair Khan', bonus: 0 },
+    { svc: regService, priority: 'senior', name: 'Baba Raza', bonus: 20 },
+    { svc: regService, priority: 'normal', name: 'Noman Ali', bonus: 0 },
+    // Lab tests (11 tokens) -> wait with 2 counters is ~21 min (20-25 min range)
+    { svc: labService, priority: 'normal', name: 'Ayesha Tariq', bonus: 0, travelMinutes: 20 },
+    { svc: labService, priority: 'pregnant', name: 'Fatima Noor', bonus: 20 },
+    { svc: labService, priority: 'normal', name: 'Bilal Ahmed', bonus: 0 },
+    { svc: labService, priority: 'normal', name: 'Kamran Akmal', bonus: 0 },
+    { svc: labService, priority: 'senior', name: 'Haji Aslam', bonus: 20 },
+    { svc: labService, priority: 'normal', name: 'Mariam Bibi', bonus: 0 },
+    { svc: labService, priority: 'normal', name: 'Daniyal Qureshi', bonus: 0 },
+    { svc: labService, priority: 'disabled', name: 'Rashid Minhas', bonus: 30 },
+    { svc: labService, priority: 'normal', name: 'Sadia Khan', bonus: 0 },
+    { svc: labService, priority: 'normal', name: 'Tariq Mehmood', bonus: 0 },
+    { svc: labService, priority: 'normal', name: 'Zainab Abbas', bonus: 0 },
+    // Pharmacy (2 tokens)
+    { svc: pharmService, priority: 'normal', name: 'Hamza Ali', bonus: 0 },
+    { svc: pharmService, priority: 'disabled', name: 'Usman Ghani', bonus: 30 }
+  ];
+
+  const seqCount = { R: 0, L: 0, P: 0 };
+  const now = Date.now();
+
+  for (let idx = 0; idx < starterTokens.length; idx++) {
+    const item = starterTokens[idx];
+    seqCount[item.svc.prefix]++;
+    const num = seqCount[item.svc.prefix];
+    const code = `${item.svc.prefix}-${String(num).padStart(3, '0')}`;
+    const joinedAt = new Date(now - (20 - idx) * 60 * 1000);
+    const effectiveTime = new Date(joinedAt.getTime() - item.bonus * 60 * 1000);
+
+    const token = await Token.create({
+      branchId,
+      serviceId: item.svc._id,
+      publicId: generatePublicId(),
+      number: num,
+      code,
+      dayKey: todayKey,
+      customerName: item.name,
+      channel: 'web',
+      isSimulated: false,
+      priorityType: item.priority,
+      priorityVerified: item.priority === 'normal' ? null : false,
+      bonusMinutes: item.bonus,
+      effectiveTime,
+      status: 'waiting',
+      joinedAt,
+      estimateAtJoinSec: item.svc.emaServiceSec * 3,
+      travelMinutes: item.travelMinutes || null
+    });
+
+    await QueueEvent.create({
+      branchId,
+      tokenId: token._id,
+      serviceId: item.svc._id,
+      type: 'joined',
+      at: joinedAt,
+      isSimulated: false
+    });
+  }
+
+  for (const [prefix, maxNum] of Object.entries(seqCount)) {
+    const svc = [regService, labService, pharmService].find(s => s.prefix === prefix);
+    const key = `${branchId}:${svc._id}:${todayKey}`;
+    await Sequence.create({ key, seq: maxNum });
+  }
+}
+
+/**
+ * 5. Reset Demo: Clear simulated tokens, restore clean starter queue, and ensure Counter 3 is closed
  */
 async function resetDemo(branchId, io = null) {
   // Stop ongoing simulation loops
@@ -216,31 +321,25 @@ async function resetDemo(branchId, io = null) {
     simState.autoServe = false;
   }
 
-  // Delete all simulated tokens and events
-  await Token.deleteMany({ branchId, isSimulated: true });
-  await QueueEvent.deleteMany({ branchId, isSimulated: true });
+  // Restore clean starter queue for today
+  await reseedTodayStarterQueue(branchId);
 
-  // Clean counters: clear active tokens that were simulated
-  const counters = await Counter.find({ branchId }).populate('currentTokenId');
+  // Set counters: Counter 3 is CLOSED, Counters 1, 2, 4 are OPEN, all currentTokenId = null
+  const counters = await Counter.find({ branchId });
   for (const c of counters) {
-    if (!c.currentTokenId || c.currentTokenId.isSimulated) {
-      c.currentTokenId = null;
-      // Default initial states: Counter 1 & 2 open, Counter 3 closed, Counter 4 open/break
-      if (c.number === 3) {
-        c.status = 'closed';
-      } else if (c.number === 4) {
-        c.status = 'break';
-      } else {
-        c.status = 'open';
-      }
-      c.statusSince = new Date();
-      await c.save();
+    c.currentTokenId = null;
+    if (c.number === 3) {
+      c.status = 'closed';
+    } else {
+      c.status = 'open';
     }
+    c.statusSince = new Date();
+    await c.save();
   }
 
   if (io) {
     emitQueueUpdate(io, branchId);
-    counters.forEach(c => emitCounterUpdate(io, branchId, c._id, c.status, c.currentTokenId));
+    counters.forEach(c => emitCounterUpdate(io, branchId, c._id, c.status, null));
     emitSimStatus(io, branchId);
   }
 

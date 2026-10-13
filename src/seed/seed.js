@@ -220,18 +220,29 @@ async function seed() {
   await Token.insertMany(historicalTokens);
   console.log(`Inserted ${historicalTokens.length} historical tokens`);
 
-  // 6. Live Starter Queue (8 waiting tokens for today)
-  console.log('Generating 8 live waiting tokens for today...');
+  // 6. Live Starter Queue (16 waiting tokens for today)
+  console.log('Generating 16 live waiting tokens for today...');
   const todayKey = getDayKey(today);
   const liveTokensData = [
+    // Registration (3)
     { svc: regService, priority: 'normal', name: 'Zubair Khan', bonus: 0 },
     { svc: regService, priority: 'senior', name: 'Baba Raza', bonus: 20 },
+    { svc: regService, priority: 'normal', name: 'Noman Ali', bonus: 0 },
+    // Lab tests (11) -> wait with 2 counters is ~21 min (20-25 min range)
     { svc: labService, priority: 'normal', name: 'Ayesha Tariq', bonus: 0 },
     { svc: labService, priority: 'pregnant', name: 'Fatima Noor', bonus: 20 },
     { svc: labService, priority: 'normal', name: 'Bilal Ahmed', bonus: 0 },
+    { svc: labService, priority: 'normal', name: 'Kamran Akmal', bonus: 0 },
+    { svc: labService, priority: 'senior', name: 'Haji Aslam', bonus: 20 },
+    { svc: labService, priority: 'normal', name: 'Mariam Bibi', bonus: 0 },
+    { svc: labService, priority: 'normal', name: 'Daniyal Qureshi', bonus: 0 },
+    { svc: labService, priority: 'disabled', name: 'Rashid Minhas', bonus: 30 },
+    { svc: labService, priority: 'normal', name: 'Sadia Khan', bonus: 0 },
+    { svc: labService, priority: 'normal', name: 'Tariq Mehmood', bonus: 0 },
+    { svc: labService, priority: 'normal', name: 'Zainab Abbas', bonus: 0 },
+    // Pharmacy (2)
     { svc: pharmService, priority: 'normal', name: 'Hamza Ali', bonus: 0 },
-    { svc: pharmService, priority: 'disabled', name: 'Usman Ghani', bonus: 30 },
-    { svc: pharmService, priority: 'normal', name: 'Sara Malik', bonus: 0 }
+    { svc: pharmService, priority: 'disabled', name: 'Usman Ghani', bonus: 30 }
   ];
 
   const todaySeq = { R: 0, L: 0, P: 0 };

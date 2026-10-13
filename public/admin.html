@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Baari · Admin & Analytics</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    /* Admin Dashboard Layout matching UI-UX.md section 4.6 */
+    .admin-wrapper {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 20px 48px;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1.5px solid var(--line);
+    }
+    .admin-brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .admin-logo {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--ink);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .admin-badge {
+      background: #0B132B;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: var(--r-pill);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .branch-chip {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: var(--r-pill);
+    }
+    .admin-controls {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    /* Range Toggle Segment: [Today | 7 days] */
+    .range-selector {
+      display: inline-flex;
+      background: #E2E8F0;
+      padding: 3px;
+      border-radius: var(--r-pill);
+      border: 1px solid var(--line);
+    }
+    .btn-range {
+      background: transparent;
+      border: none;
+      padding: 6px 14px;
+      border-radius: var(--r-pill);
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-range.active {
+      background: var(--paper);
+      color: var(--ink);
+      box-shadow: 0 1px 4px rgba(20, 33, 61, 0.1);
+    }
+    /* Toggle "Include demo data" */
+    .demo-toggle-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+      cursor: pointer;
+      user-select: none;
+    }
+    .demo-toggle-input {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--signal);
+      cursor: pointer;
+    }
+    .link-staff-console {
+      color: var(--signal);
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .link-staff-console:hover {
+      text-decoration: underline;
+    }
+
+    /* Exactly 4 Stat Figures */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .stat-tile {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--r-panel);
+      padding: 18px 20px;
+      box-shadow: var(--card-shadow);
+    }
+    .stat-tile-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .stat-tile-value {
+      font-family: var(--font-display);
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.1;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .stat-tile-unit {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    /* Main Grid: Combined Chart & Counter Table */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 920px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--r-panel);
+      padding: 22px 24px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .panel-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--ink);
+      margin: 0;
+    }
+    .chart-container {
+      position: relative;
+      height: 290px;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    /* Quietest hours (best to visit) */
+    .quietest-box {
+      border-top: 1.5px solid var(--line);
+      padding-top: 16px;
+      margin-top: auto;
+    }
+    .quietest-heading {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .quietest-tags {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .quietest-tag {
+      background: #ECFDF5;
+      color: #065F46;
+      border: 1px solid #A7F3D0;
+      border-radius: var(--r-pill);
+      padding: 5px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: var(--font-display);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Counter Performance Table */
+    .table-responsive {
+      flex: 1;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+    .perf-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .perf-table th {
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 10px 8px;
+      border-bottom: 1.5px solid var(--line);
+    }
+    .perf-table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      color: var(--ink);
+      font-weight: 500;
+    }
+    .perf-table tr:last-child td {
+      border-bottom: none;
+    }
+    .badge-status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: var(--r-pill);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .badge-status.open { background: #D1FAE5; color: #065F46; }
+    .badge-status.closed { background: #FEE2E2; color: #991B1B; }
+    .badge-status.break { background: #FEF3C7; color: #92400E; }
+
+    /* No-show rate summary */
+    .no-show-panel {
+      border-top: 1.5px solid var(--line);
+      padding-top: 16px;
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .no-show-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .no-show-figure {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--flag);
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-wrapper">
+    <!-- Header with Breadcrumbs, Range [Today | 7 days], and Include Demo Data Toggle -->
+    <header class="admin-header">
+      <div class="admin-brand-group">
+        <a href="/" class="admin-logo">
+          <span>Baari</span>
+          <span class="admin-badge">Admin</span>
+        </a>
+        <span class="branch-chip" id="branchNameDisplay">City Civic Center</span>
+      </div>
+
+      <div class="admin-controls">
+        <!-- Range Selector: [Today | 7 days] -->
+        <div class="range-selector" id="rangeSelector" role="tablist">
+          <button type="button" class="btn-range active" data-range="today">Today</button>
+          <button type="button" class="btn-range" data-range="7days">7 days</button>
+        </div>
+
+        <!-- Toggle: Include demo data -->
+        <label class="demo-toggle-wrap">
+          <input type="checkbox" id="includeDemoToggle" class="demo-toggle-input" checked>
+          <span>Include demo data</span>
+        </label>
+
+        <a href="/staff" class="link-staff-console">
+          Staff Console →
+        </a>
+      </div>
+    </header>
+
+    <!-- Exactly Four Stat Figures (UI-UX 4.6) -->
+    <section class="stats-row" aria-label="Key queue figures">
+      <div class="stat-tile">
+        <div class="stat-tile-title">Average wait</div>
+        <div class="stat-tile-value num">
+          <span id="statAvgWait">--</span>
+          <span class="stat-tile-unit">min</span>
+        </div>
+      </div>
+
+      <div class="stat-tile">
+        <div class="stat-tile-title">Average service</div>
+        <div class="stat-tile-value num">
+          <span id="statAvgService">--</span>
+          <span class="stat-tile-unit">min</span>
+        </div>
+      </div>
+
+      <div class="stat-tile">
+        <div class="stat-tile-title">Completed</div>
+        <div class="stat-tile-value num">
+          <span id="statCompleted">--</span>
+        </div>
+      </div>
+
+      <div class="stat-tile">
+        <div class="stat-tile-title">In queue now</div>
+        <div class="stat-tile-value num">
+          <span id="statInQueue">--</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Grid: ONE Combined Chart & ONE Counter Performance Table -->
+    <section class="main-grid">
+      <!-- 1. Arrivals and wait by hour: Combined Chart.js (bars for arrivals, line for average wait) -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Arrivals and wait by hour</h2>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="combinedHourlyChart"></canvas>
+        </div>
+
+        <!-- Quietest hours (best to visit) -->
+        <div class="quietest-box">
+          <div class="quietest-heading">Quietest hours (best to visit)</div>
+          <div class="quietest-tags" id="quietestHoursList">
+            <span class="quietest-tag">Loading...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Counter performance table + No-show rate -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Counter performance</h2>
+        </div>
+
+        <div class="table-responsive">
+          <table class="perf-table">
+            <thead>
+              <tr>
+                <th>Counter</th>
+                <th>Status</th>
+                <th>Served</th>
+                <th>Avg Svc</th>
+              </tr>
+            </thead>
+            <tbody id="counterTableBody">
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--muted); padding: 24px;">Loading performance...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="no-show-panel">
+          <span class="no-show-title">No-show rate</span>
+          <span class="no-show-figure num" id="noShowRateDisplay">--%</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/socket.js"></script>
+  <script>
+    let currentBranchId = null;
+    let currentRange = 'today';
+    let includeDemoData = true;
+    let hourlyChartInstance = null;
+
+    // Range buttons
+    const rangeButtons = document.querySelectorAll('.btn-range');
+    rangeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        rangeButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentRange = btn.dataset.range;
+        loadAllAnalytics();
+      });
+    });
+
+    // Toggle include demo data
+    const demoToggle = document.getElementById('includeDemoToggle');
+    demoToggle.addEventListener('change', () => {
+      includeDemoData = demoToggle.checked;
+      loadAllAnalytics();
+    });
+
+    async function initAdmin() {
+      try {
+        const demo = await API.getDemoBranch();
+        currentBranchId = demo.branchId;
+
+        // Fetch branch info
+        const branchRes = await fetch(`/api/branches/${currentBranchId}/public`);
+        if (branchRes.ok) {
+          const bData = await branchRes.json();
+          if (bData.branch && bData.branch.name) {
+            document.getElementById('branchNameDisplay').textContent = bData.branch.name;
+          }
+        }
+
+        await loadAllAnalytics();
+
+        // Connect real-time socket updates
+        SocketManager.init({
+          onConnect: () => SocketManager.joinBranch(currentBranchId),
+          onQueueUpdate: () => loadAllAnalytics(),
+          onCounterUpdate: () => loadAllAnalytics()
+        });
+      } catch (err) {
+        console.error('Failed to init Admin Dashboard:', err);
+      }
+    }
+
+    async function loadAllAnalytics() {
+      if (!currentBranchId) return;
+
+      const opts = {
+        branchId: currentBranchId,
+        range: currentRange,
+        includeSimulated: includeDemoData
+      };
+
+      try {
+        const [summary, hourly, counters, bestTime] = await Promise.all([
+          API.getAnalyticsSummary(opts),
+          API.getAnalyticsHourly(opts),
+          API.getAnalyticsCounters(opts),
+          API.getBestTime(currentBranchId)
+        ]);
+
+        renderSummary(summary);
+        renderHourlyChart(hourly);
+        renderCounters(counters);
+        renderQuietestHours(bestTime);
+      } catch (err) {
+        console.error('Error loading analytics:', err);
+      }
+    }
+
+    // 1. Render exactly four stat figures
+    function renderSummary(summary) {
+      document.getElementById('statAvgWait').textContent = summary.avgWaitMin || '0';
+      document.getElementById('statAvgService').textContent = summary.avgSvcMin || '0';
+      document.getElementById('statCompleted').textContent = summary.completed || '0';
+      document.getElementById('statInQueue').textContent = summary.inQueueNow || '0';
+      document.getElementById('noShowRateDisplay').textContent = `${summary.noShowRate || 0}%`;
+    }
+
+    // 2. Render ONE combined hourly chart (bars for arrivals, line for average wait)
+    function renderHourlyChart(hourlyData) {
+      const hours = hourlyData.hours || [];
+      const labels = hours.map(h => h.label);
+      const arrivals = hours.map(h => h.arrivals);
+      const waitMinutes = hours.map(h => h.avgWaitMin);
+
+      const ctx = document.getElementById('combinedHourlyChart').getContext('2d');
+
+      if (hourlyChartInstance) {
+        hourlyChartInstance.destroy();
+      }
+
+      hourlyChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              type: 'bar',
+              label: 'Arrivals',
+              data: arrivals,
+              backgroundColor: '#2F5BEA',
+              hoverBackgroundColor: '#1F47CA',
+              borderRadius: 6,
+              yAxisID: 'yArrivals',
+              order: 2
+            },
+            {
+              type: 'line',
+              label: 'Average wait (min)',
+              data: waitMinutes,
+              borderColor: '#E0A100',
+              backgroundColor: 'rgba(224, 161, 0, 0.1)',
+              borderWidth: 2.5,
+              pointBackgroundColor: '#E0A100',
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              tension: 0.3,
+              yAxisID: 'yWait',
+              order: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                boxWidth: 12,
+                font: { family: "'Figtree', sans-serif", weight: '600', size: 12 }
+              }
+            },
+            tooltip: {
+              backgroundColor: '#14213D',
+              titleFont: { family: "'Archivo', sans-serif", weight: '700' },
+              bodyFont: { family: "'Figtree', sans-serif" },
+              padding: 10,
+              cornerRadius: 8
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                font: { family: "'Figtree', sans-serif", size: 11, weight: '600' },
+                color: '#5B6785'
+              }
+            },
+            yArrivals: {
+              type: 'linear',
+              position: 'left',
+              title: {
+                display: true,
+                text: 'Arrivals (people)',
+                font: { family: "'Figtree', sans-serif", size: 11, weight: '700' },
+                color: '#2F5BEA'
+              },
+              beginAtZero: true,
+              ticks: {
+                precision: 0,
+                font: { family: "'Archivo', sans-serif" },
+                color: '#5B6785'
+              },
+              grid: { color: '#E2E8F0' }
+            },
+            yWait: {
+              type: 'linear',
+              position: 'right',
+              title: {
+                display: true,
+                text: 'Average wait (min)',
+                font: { family: "'Figtree', sans-serif", size: 11, weight: '700' },
+                color: '#E0A100'
+              },
+              beginAtZero: true,
+              ticks: {
+                font: { family: "'Archivo', sans-serif" },
+                color: '#5B6785'
+              },
+              grid: { drawOnChartArea: false }
+            }
+          }
+        }
+      });
+    }
+
+    // 3. Render Counter Performance Table
+    function renderCounters(counterData) {
+      const tbody = document.getElementById('counterTableBody');
+      const counters = counterData.counters || [];
+
+      if (counters.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--muted); padding: 20px;">No counters found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = counters.map(c => `
+        <tr>
+          <td>
+            <div style="font-weight: 700; color: var(--ink);">${c.name}</div>
+            <div style="font-size: 12px; color: var(--muted);">${c.services || 'All services'}</div>
+          </td>
+          <td>
+            <span class="badge-status ${c.status}">${c.status}</span>
+          </td>
+          <td class="num" style="font-weight: 700;">
+            ${c.served} <span style="font-size: 12px; font-weight: normal; color: var(--muted);">served</span>
+          </td>
+          <td class="num" style="font-weight: 700;">
+            ${c.avgSvcMin} <span style="font-size: 12px; font-weight: normal; color: var(--muted);">min</span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 4. Render Quietest hours tags (best to visit)
+    function renderQuietestHours(bestTimeData) {
+      const container = document.getElementById('quietestHoursList');
+      const bestHours = bestTimeData.bestHours || [];
+
+      if (bestHours.length === 0) {
+        container.innerHTML = '<span class="quietest-tag">2 to 3 pm</span>';
+        return;
+      }
+
+      container.innerHTML = bestHours.map(bh => `
+        <span class="quietest-tag">
+          <span style="font-size: 14px;">⚡</span>
+          <span>${bh.label}</span>
+          <span style="font-size: 11px; opacity: 0.85;">(~${bh.avgWaitMin}m wait)</span>
+        </span>
+      `).join('');
+    }
+
+    initAdmin();
+  </script>
+</body>
+</html>
