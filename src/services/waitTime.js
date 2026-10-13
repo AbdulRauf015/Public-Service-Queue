@@ -126,9 +126,111 @@ async function getServiceEstimate(branchId, serviceId) {
   };
 }
 
+/**
+ * Update service EMA after a token is completed
+ * Formula:
+ * duration = clamp((completedAt - servingStartedAt)/1000, 30, 3600)
+ * ema_new = alpha * duration + (1 - alpha) * ema_old
+ * sampleCount += 1
+ */
+async function updateEma(serviceId, durationSec, alpha = 0.2) {
+  const service = await Service.findById(serviceId);
+  if (!service) return null;
+
+  const { clamp } = require('../utils/helpers');
+  const clampedDuration = clamp(durationSec, 30, 3600);
+  const oldEma = service.emaServiceSec || service.defaultServiceSec || 180;
+
+  const newEma = Number((alpha * clampedDuration + (1 - alpha) * oldEma).toFixed(1));
+  service.emaServiceSec = newEma;
+  service.sampleCount = (service.sampleCount || 0) + 1;
+  await service.save();
+
+  return {
+    service,
+    durationSec: clampedDuration,
+    oldEma,
+    newEma,
+    sampleCount: service.sampleCount
+  };
+}
+
+/**
+ * What-If Engine (powers the What-If Panel)
+ * Computes before and after estimate for a service with deltaCounters
+ */
+async function whatIf(branchId, serviceId, deltaCounters = 1) {
+  const service = await Service.findById(serviceId);
+  if (!service) return null;
+
+  const avgSvc = service.emaServiceSec || service.defaultServiceSec || 180;
+
+  const openCounters = await Counter.find({
+    branchId,
+    status: 'open',
+    serviceIds: serviceId
+  });
+
+  const waitingCount = await Token.countDocuments({
+    branchId,
+    serviceId,
+    status: 'waiting'
+  });
+
+  // Calculate remaining time for currently busy counters
+  let remainingSec = 0;
+  const now = Date.now();
+  for (const counter of openCounters) {
+    if (counter.currentTokenId) {
+      const activeToken = await Token.findById(counter.currentTokenId);
+      if (activeToken && activeToken.servingStartedAt) {
+        const elapsedSec = (now - new Date(activeToken.servingStartedAt).getTime()) / 1000;
+        const leftSec = Math.max(0, avgSvc - elapsedSec);
+        remainingSec += leftSec;
+      }
+    }
+  }
+
+  const currentCount = openCounters.length;
+  const targetCount = currentCount + Number(deltaCounters);
+
+  if (targetCount <= 0) {
+    return {
+      beforeSec: currentCount > 0 ? Math.round((waitingCount * avgSvc + remainingSec) / currentCount) : null,
+      afterSec: null,
+      savedSec: 0,
+      beforeMin: currentCount > 0 ? Math.round(((waitingCount * avgSvc + remainingSec) / currentCount) / 60) : null,
+      afterMin: null,
+      savedMin: 0,
+      currentCounters: currentCount,
+      targetCounters: targetCount
+    };
+  }
+
+  const beforeSec = currentCount > 0
+    ? Math.round((waitingCount * avgSvc + remainingSec) / currentCount)
+    : null;
+
+  const afterSec = Math.round((waitingCount * avgSvc + remainingSec) / targetCount);
+  const savedSec = beforeSec !== null ? Math.max(0, beforeSec - afterSec) : 0;
+
+  return {
+    beforeSec,
+    afterSec,
+    savedSec,
+    beforeMin: beforeSec !== null ? Math.round(beforeSec / 60) : null,
+    afterMin: Math.round(afterSec / 60),
+    savedMin: Math.round(savedSec / 60),
+    currentCounters: currentCount,
+    targetCounters: targetCount
+  };
+}
+
 module.exports = {
   confidenceLabel,
   getAheadCount,
   getEstimate,
-  getServiceEstimate
+  getServiceEstimate,
+  updateEma,
+  whatIf
 };

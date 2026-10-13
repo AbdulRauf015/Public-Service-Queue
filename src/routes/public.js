@@ -250,6 +250,15 @@ router.post('/tokens/:publicId/here', async (req, res) => {
       return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Token not found' } });
     }
 
+    if (token.status !== 'called') {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_STATUS',
+          message: `Cannot confirm arrival: token status is '${token.status}', but must be 'called'`
+        }
+      });
+    }
+
     token.hereAt = new Date();
     await token.save();
 
