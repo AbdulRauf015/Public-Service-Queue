@@ -1,25 +1,40 @@
 /* public/css/app.css */
-/* Application layout and UI components matching UI-UX.md */
+/* Clean, warm, accessible UI following UI-UX.md sections 1, 2, 4.1, 4.2, 5, 6 */
 
 * {
   box-sizing: border-box;
 }
 
+body {
+  background: var(--mist);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px; /* 16px minimum body text */
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+}
+
 .page-wrapper {
-  max-width: 480px;
+  max-width: 440px;
   margin: 0 auto;
   min-height: 100vh;
-  padding: 16px 16px 32px;
+  padding: 20px 20px 96px; /* Space for sticky bottom button */
   display: flex;
   flex-direction: column;
 }
 
-/* Header & Top Bar */
+/* 24px spacing between sections */
+.section-gap {
+  margin-bottom: 24px;
+}
+
+/* Top Navigation */
 .top-nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .brand-logo {
@@ -30,7 +45,13 @@
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+}
+
+.brand-logo .sub {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--muted);
 }
 
 .lang-switch {
@@ -38,20 +59,20 @@
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
-  padding: 3px;
-  gap: 2px;
+  padding: 4px;
+  gap: 4px;
 }
 
 .lang-btn {
   background: none;
   border: none;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   color: var(--muted);
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: var(--r-pill);
   cursor: pointer;
-  min-height: 32px;
+  min-height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,59 +83,66 @@
   color: #FFFFFF;
 }
 
-/* Hero Section */
+/* Headings & Plain Labels (Sentence case, no ALL-CAPS) */
 .hero-title {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 800;
   line-height: 1.15;
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   letter-spacing: -0.5px;
 }
 
 .hero-subtitle {
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: 400;
   color: var(--muted);
-  margin: 0 0 20px;
+  margin: 0 0 24px;
 }
 
-/* Branch Card */
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 14px;
+  color: var(--ink);
+}
+
+/* Branch Status Card */
 .branch-card {
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--r-panel);
-  padding: 16px;
-  margin-bottom: 20px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
 }
 
 .branch-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .branch-name {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   margin: 0;
 }
 
 .demo-badge {
   background: #E2E8F0;
-  color: #475569;
-  font-size: 12px;
+  color: var(--muted);
+  font-size: 13px;
   font-weight: 600;
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 4px;
 }
 
 .busy-meter {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 13px;
+  gap: 12px;
+  font-size: 15px;
   color: var(--muted);
-  margin-top: 6px;
 }
 
 .busy-bars {
@@ -123,7 +151,7 @@
 }
 
 .busy-bar {
-  width: 14px;
+  width: 16px;
   height: 6px;
   border-radius: 3px;
   background: var(--line);
@@ -134,96 +162,106 @@
 .busy-bar.active-3 { background: var(--hold); }
 .busy-bar.active-4 { background: var(--flag); }
 
-/* Form Elements */
-.section-label {
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--muted);
-  margin: 0 0 10px;
-  display: block;
-}
-
-.service-group {
+/* Service Selector - Big Tappable Rows (Min 56px) */
+.services-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 24px;
 }
 
-.service-option {
+.service-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: var(--paper);
   border: 1.5px solid var(--line);
   border-radius: var(--r-panel);
-  padding: 14px 16px;
+  padding: 16px 20px;
   cursor: pointer;
-  min-height: 52px; /* Touch target >= 44px */
-  transition: border-color 0.2s, background 0.2s;
+  min-height: 58px; /* Tappable >= 56px */
+  transition: border-color 0.15s, background 0.15s;
 }
 
-.service-option:hover {
+.service-row:hover {
   border-color: #94A3B8;
 }
 
-.service-option.selected {
+.service-row.selected {
   border-color: var(--signal);
   background: #F8FAFC;
 }
 
-.service-left {
+.service-row-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
-.radio-dot {
-  width: 20px;
-  height: 20px;
+.radio-indicator {
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   border: 2px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.service-option.selected .radio-dot {
+.service-row.selected .radio-indicator {
   border-color: var(--signal);
 }
 
-.service-option.selected .radio-dot::after {
+.service-row.selected .radio-indicator::after {
   content: '';
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--signal);
 }
 
-.service-title {
-  font-weight: 600;
-  font-size: 16px;
+.service-name {
+  font-size: 17px;
+  font-weight: 700;
 }
 
-.service-estimate {
-  font-size: 14px;
+.service-wait {
+  font-size: 16px;
   font-weight: 600;
   color: var(--muted);
 }
 
-/* Secondary Inputs */
-.input-card {
+/* Collapsible "More options" for Priority & Travel time */
+.more-options-toggle {
+  background: none;
+  border: none;
+  color: var(--signal);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 8px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.more-options-panel {
+  display: none;
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--r-panel);
-  padding: 16px;
-  margin-bottom: 20px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+}
+
+.more-options-panel.open {
+  display: block;
 }
 
 .form-field {
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .form-field:last-child {
@@ -232,15 +270,15 @@
 
 .field-label {
   display: block;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
-.field-subtext {
-  font-size: 12px;
+.field-note {
+  font-size: 14px;
   color: var(--muted);
-  margin-top: 4px;
+  margin-top: 6px;
   line-height: 1.4;
 }
 
@@ -250,31 +288,48 @@
   padding: 12px 14px;
   border: 1px solid var(--line);
   border-radius: var(--r-input);
-  font-size: 15px;
+  font-size: 16px; /* 16px minimum */
   font-family: inherit;
   color: var(--ink);
   background: #FFFFFF;
-  min-height: 48px; /* Touch target >= 44px */
+  min-height: 48px;
 }
 
-/* Primary Button */
+/* Sticky / Fixed Bottom Action Bar */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(238, 242, 248, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 16px 20px;
+  border-top: 1px solid var(--line);
+  z-index: 100;
+}
+
+.bottom-bar-inner {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
 .btn-primary {
   width: 100%;
   background: var(--signal);
   color: #FFFFFF;
   border: none;
   border-radius: var(--r-pill);
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
-  padding: 16px;
+  padding: 14px 20px;
   cursor: pointer;
-  min-height: 52px;
-  box-shadow: 0 4px 14px rgba(47, 91, 234, 0.3);
-  transition: transform 0.1s, opacity 0.2s;
+  min-height: 52px; /* At least 48px */
+  box-shadow: 0 6px 18px rgba(47, 91, 234, 0.28);
+  transition: transform 0.1s ease, opacity 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
 }
 
 .btn-primary:active {
@@ -285,127 +340,186 @@
   width: 100%;
   background: var(--paper);
   color: var(--ink);
-  border: 1.5px solid var(--line);
+  border: 1px solid var(--line);
   border-radius: var(--r-pill);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
-  padding: 12px 16px;
+  padding: 12px 18px;
   cursor: pointer;
-  min-height: 46px;
+  min-height: 48px;
+  text-align: center;
 }
 
-/* Ticket Details Screen Elements */
-.ticket-container {
-  margin-bottom: 20px;
+/* =========================================
+   MY TOKEN HERO SCREEN (UI-UX.md section 4.2)
+   ========================================= */
+
+/* Hero Ticket Stub: First and biggest thing */
+.ticket-wrapper {
+  margin-bottom: 24px;
 }
 
-.ticket-header-label {
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  opacity: 0.8;
-  margin-bottom: 6px;
+.ticket {
+  background: var(--ticket);
+  color: var(--ink);
+  border-radius: var(--r-ticket);
+  padding: 24px 22px 22px;
+  position: relative;
+  box-shadow: var(--ticket-shadow);
+  text-align: center;
 }
 
+.ticket-top-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(20, 33, 61, 0.7);
+  margin-bottom: 8px;
+}
+
+/* Giant Archivo code at 96px to 120px */
 .ticket-code {
   font-family: var(--font-display);
-  font-size: 80px;
+  font-size: 108px;
   font-weight: 900;
-  line-height: 0.95;
-  letter-spacing: -2px;
-  margin: 6px 0 12px;
+  line-height: 0.9;
+  letter-spacing: -3px;
+  margin: 4px 0 16px;
 }
 
-.ticket-state-msg {
-  font-size: 20px;
+/* Dashed perforation divider */
+.perf {
+  border-top: 2px dashed rgba(20, 33, 61, 0.35);
+  margin: 18px 0;
+}
+
+/* Large readable text inside ticket (at least 20px) */
+.ticket-ahead {
+  font-size: 22px;
   font-weight: 800;
   margin: 0 0 6px;
 }
 
-.ticket-estimate-range {
+.ticket-estimate {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.ticket-confidence {
   font-size: 15px;
   font-weight: 600;
-  margin: 0 0 6px;
+  color: rgba(20, 33, 61, 0.75);
 }
 
-.ticket-confidence-chip {
+/* Called State: whole ticket turns green */
+.ticket.is-turn {
+  background: var(--go) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 12px 28px rgba(20, 163, 127, 0.35);
+}
+
+.ticket.is-turn .ticket-top-label,
+.ticket.is-turn .ticket-confidence {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.ticket.is-turn .perf {
+  border-top-color: rgba(255, 255, 255, 0.45);
+}
+
+.btn-im-here {
+  background: #FFFFFF;
+  color: var(--go);
+  border: none;
+  border-radius: var(--r-pill);
+  font-size: 18px;
+  font-weight: 800;
+  padding: 14px 24px;
+  width: 100%;
+  min-height: 50px;
+  cursor: pointer;
+  margin-top: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.grace-countdown {
   display: inline-block;
-  background: rgba(20, 33, 61, 0.1);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-.ticket.is-turn .ticket-confidence-chip {
   background: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 10px;
 }
 
-/* Alert Notification Banner on Token Page */
-.banner {
-  padding: 12px 14px;
+/* Alert Banner */
+.alert-banner {
+  padding: 14px 16px;
   border-radius: var(--r-panel);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.banner-leave { background: #DBEAFE; color: #1E40AF; border-left: 4px solid var(--signal); }
-.banner-almost { background: #FEF3C7; color: #92400E; border-left: 4px solid var(--hold); }
-.banner-turn { background: #DCFCE7; color: #14532D; border-left: 4px solid var(--go); }
+.alert-banner.leave {
+  background: #DBEAFE;
+  color: #1E40AF;
+  border-left: 4px solid var(--signal);
+}
 
-/* Queue Lane */
-.queue-lane-card {
+.alert-banner.almost {
+  background: #FEF3C7;
+  color: #92400E;
+  border-left: 4px solid var(--hold);
+}
+
+.alert-banner.turn {
+  background: #DCFCE7;
+  color: #14532D;
+  border-left: 4px solid var(--go);
+}
+
+/* Queue Lane (Large dots, clear track, counter desk icon) */
+.queue-lane-box {
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--r-panel);
-  padding: 16px;
-  margin-bottom: 16px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
 }
 
-.queue-lane-title {
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 12px;
+.queue-lane-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.queue-lane-header span:first-child {
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .queue-lane-track {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   overflow-x: auto;
   padding: 8px 4px;
 }
 
+/* Dots at least 14px to 18px */
 .lane-dot {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--line);
   flex-shrink: 0;
-  transition: transform 0.3s ease, background 0.3s ease;
-  position: relative;
-}
-
-.lane-dot.is-you {
-  width: 26px;
-  height: 26px;
-  background: var(--signal);
-  box-shadow: 0 0 0 4px rgba(47, 91, 234, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
+  transition: transform 0.3s ease;
 }
 
 .lane-dot.is-priority {
@@ -413,91 +527,90 @@
   border: 2px solid var(--ink);
 }
 
-.lane-counter-desk {
+.lane-dot.is-you {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--signal);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 0 0 4px rgba(47, 91, 234, 0.2);
+}
+
+.lane-desk {
   background: var(--ink);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 8px;
+  color: #FFFFFF;
+  padding: 6px 12px;
   border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
   flex-shrink: 0;
 }
 
-/* Travel time update block */
-.travel-updater {
+/* Smart Leave Alert Card */
+.travel-card {
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--r-panel);
-  padding: 14px 16px;
-  margin-bottom: 16px;
-  font-size: 14px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
 }
 
 .travel-row {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .travel-input {
   width: 80px;
+  min-height: 44px;
   padding: 8px 10px;
   border: 1px solid var(--line);
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: var(--r-input);
+  font-size: 16px;
+  font-family: inherit;
   text-align: center;
 }
 
-.btn-sm {
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: var(--r-pill);
+.btn-update {
   background: var(--ink);
-  color: #fff;
+  color: #FFFFFF;
   border: none;
+  padding: 10px 18px;
+  border-radius: var(--r-pill);
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
+  min-height: 44px;
 }
 
-/* Actions Row */
-.action-buttons-row {
+.travel-note {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--signal);
+  margin-top: 10px;
+}
+
+/* Action Buttons (Share, Cancel) */
+.actions-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
-/* Honest Note */
-.honest-note {
-  font-size: 13px;
-  color: var(--muted);
+/* Honest footer note */
+.honest-footer {
   text-align: center;
+  font-size: 15px;
+  color: var(--muted);
   line-height: 1.4;
   margin-top: auto;
-  padding: 12px 0 0;
-}
-
-/* Offline Chip */
-.reconnecting-chip {
-  display: none;
-  background: var(--flag);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: var(--r-pill);
-  text-align: center;
-  margin-bottom: 12px;
-}
-
-/* Grace timer countdown for called state */
-.grace-timer {
-  font-size: 14px;
-  font-weight: 700;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 6px 12px;
-  border-radius: 20px;
-  display: inline-block;
-  margin-top: 8px;
+  padding: 16px 0;
 }

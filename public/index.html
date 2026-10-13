@@ -9,33 +9,33 @@
 </head>
 <body>
   <div class="page-wrapper">
-    <!-- Top Navigation -->
+    <!-- Top Bar with Language Switch -->
     <header class="top-nav">
       <a href="/" class="brand-logo">
         <span>Baari</span>
-        <span style="font-size: 16px; color: var(--muted); font-weight: 500;">باری</span>
+        <span class="sub">باری</span>
       </a>
-      <div class="lang-switch" role="group" aria-label="Language selection">
+      <div class="lang-switch" role="group" aria-label="Language">
         <button type="button" class="lang-btn active" data-lang="en">EN</button>
         <button type="button" class="lang-btn" data-lang="ur">اردو</button>
         <button type="button" class="lang-btn" data-lang="sd">سنڌي</button>
       </div>
     </header>
 
-    <!-- Hero Title -->
     <main>
+      <!-- Hero Headline -->
       <h1 class="hero-title">Skip the line.<br>Keep your turn.</h1>
-      <p class="hero-subtitle">Get a digital token and wait from anywhere.</p>
+      <p class="hero-subtitle">Wait anywhere. Be there when it's your baari.</p>
 
       <!-- Branch Status Card -->
-      <section class="branch-card" aria-labelledby="branchHeading">
+      <section class="branch-card" aria-label="Location status">
         <div class="branch-header">
-          <h2 id="branchHeading" class="branch-name" id="branchName">City Civic Center</h2>
+          <h2 class="branch-name" id="branchName">City Civic Center</h2>
           <span class="demo-badge">demo data</span>
         </div>
         <div class="busy-meter">
           <span>Busy now:</span>
-          <div class="busy-bars" id="busyBars" aria-label="Busy meter indicator">
+          <div class="busy-bars" id="busyBars" aria-label="Busy level indicator">
             <span class="busy-bar active-1"></span>
             <span class="busy-bar active-2"></span>
             <span class="busy-bar"></span>
@@ -45,54 +45,64 @@
         </div>
       </section>
 
-      <!-- Token Creation Form -->
-      <form id="joinForm">
-        <span class="section-label">What do you need?</span>
-        <div class="service-group" id="servicesList" role="radiogroup" aria-label="Select a service">
-          <!-- Dynamic Services will populate here -->
-          <div style="padding: 16px; text-align: center; color: var(--muted); background: var(--paper); border-radius: var(--r-panel);">
+      <!-- Service Selection (One decision per step) -->
+      <section>
+        <h2 class="section-title">What do you need?</h2>
+        <div class="services-list" id="servicesList" role="radiogroup" aria-label="Available services">
+          <div style="background: var(--paper); border: 1.5px solid var(--line); border-radius: var(--r-panel); padding: 18px 20px; text-align: center; color: var(--muted); min-height: 58px;">
             Loading services...
           </div>
         </div>
+      </section>
 
-        <div class="input-card">
-          <!-- Priority Selector -->
-          <div class="form-field">
-            <label for="prioritySelect" class="field-label">Need priority assistance?</label>
-            <select id="prioritySelect" class="custom-select">
-              <option value="normal">None (Standard queue)</option>
-              <option value="senior">Senior citizen (+20 min bonus)</option>
-              <option value="pregnant">Pregnant (+20 min bonus)</option>
-              <option value="disabled">Disabled (+30 min bonus)</option>
-              <option value="emergency">Emergency (+120 min bonus)</option>
-            </select>
-            <div class="field-subtext">Staff will verify priority eligibility at the counter.</div>
-          </div>
+      <!-- Collapsible More Options (Priority & Travel Time) -->
+      <button type="button" id="moreOptionsToggle" class="more-options-toggle">
+        <span id="toggleIcon">+</span>
+        <span>More options (priority, travel time)</span>
+      </button>
 
-          <!-- Travel Time Input -->
-          <div class="form-field" style="margin-top: 14px;">
-            <label for="travelMinutesInput" class="field-label">How far away are you? (minutes)</label>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <input type="number" id="travelMinutesInput" class="custom-input" placeholder="e.g. 20" min="0" max="180">
-              <span style="font-weight: 600; color: var(--muted);">min</span>
-            </div>
-            <div class="field-subtext">Optional. We will notify you with "Leave now" so you arrive just in time.</div>
-          </div>
+      <div id="moreOptionsPanel" class="more-options-panel">
+        <!-- Priority Lane -->
+        <div class="form-field">
+          <label for="prioritySelect" class="field-label">Need priority assistance?</label>
+          <select id="prioritySelect" class="custom-select">
+            <option value="normal">None (Standard queue)</option>
+            <option value="senior">Senior citizen (+20 min bonus)</option>
+            <option value="pregnant">Pregnant (+20 min bonus)</option>
+            <option value="disabled">Disabled (+30 min bonus)</option>
+            <option value="emergency">Emergency (+120 min bonus)</option>
+          </select>
+          <div class="field-note">Staff will check priority at the counter.</div>
         </div>
 
-        <button type="submit" id="submitBtn" class="btn-primary">
-          <span>Get my token</span>
-        </button>
-      </form>
+        <!-- Travel Time -->
+        <div class="form-field" style="margin-top: 18px;">
+          <label for="travelInput" class="field-label">How far away are you?</label>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="number" id="travelInput" class="custom-input" placeholder="e.g. 20" min="0" max="180" style="width: 100px;">
+            <span style="font-weight: 600; color: var(--muted);">minutes</span>
+          </div>
+          <div class="field-note">Optional. We will tell you when to leave so you arrive just before your turn.</div>
+        </div>
+      </div>
     </main>
 
     <!-- Footer Note -->
-    <footer class="honest-note">
-      <div id="bestTimeHint" style="font-weight: 600; color: var(--ink); margin-bottom: 4px;">
-        Quietest time today: 2:00 PM to 3:00 PM
+    <footer class="honest-footer">
+      <div id="bestTimeHint" style="font-weight: 700; color: var(--ink); margin-bottom: 4px;">
+        Quietest time today: 2 to 3 pm
       </div>
       <div>Estimates update live. They are not promises.</div>
     </footer>
+
+    <!-- Fixed Bottom Sticky Button (One tap to get token) -->
+    <div class="bottom-bar">
+      <div class="bottom-bar-inner">
+        <button type="button" id="submitBtn" class="btn-primary">
+          <span>Get my token</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
@@ -102,7 +112,16 @@
     let currentBranchId = null;
     let selectedServiceId = null;
 
-    // Detect branch from URL path (/q/:branchId) or fetch demo
+    // Toggle more options
+    const moreToggle = document.getElementById('moreOptionsToggle');
+    const morePanel = document.getElementById('moreOptionsPanel');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    moreToggle.addEventListener('click', () => {
+      const isOpen = morePanel.classList.toggle('open');
+      toggleIcon.textContent = isOpen ? '−' : '+';
+    });
+
     async function initJoinPage() {
       try {
         const pathParts = window.location.pathname.split('/');
@@ -121,14 +140,14 @@
           onQueueUpdate: () => loadBranchData(currentBranchId)
         });
       } catch (err) {
-        console.error('Failed to initialize join page:', err);
+        console.error('Failed to init join page:', err);
       }
     }
 
     async function loadBranchData(branchId) {
       try {
         const data = await API.getBranchPublic(branchId);
-        document.getElementById('branchHeading').textContent = data.branch.name;
+        document.getElementById('branchName').textContent = data.branch.name;
 
         // Render busy meter
         const busyLabel = document.getElementById('busyLabel');
@@ -143,7 +162,7 @@
           busyBars.appendChild(bar);
         }
 
-        // Render services list
+        // Render services list (min 58px tappable rows)
         const container = document.getElementById('servicesList');
         container.innerHTML = '';
 
@@ -152,25 +171,25 @@
           if (isSelected) selectedServiceId = svc._id;
 
           const row = document.createElement('div');
-          row.className = `service-option ${isSelected ? 'selected' : ''}`;
+          row.className = `service-row ${isSelected ? 'selected' : ''}`;
           row.role = 'radio';
           row.tabIndex = 0;
           row.setAttribute('aria-checked', isSelected ? 'true' : 'false');
           row.dataset.id = svc._id;
 
           const waitMin = svc.estimateSec !== null ? Math.round(svc.estimateSec / 60) : null;
-          const waitText = waitMin !== null ? `~${waitMin} min` : 'No open counter';
+          const waitText = waitMin !== null ? `~${waitMin} min` : 'No counter open right now';
 
           row.innerHTML = `
-            <div class="service-left">
-              <span class="radio-dot"></span>
-              <span class="service-title">${svc.name}</span>
+            <div class="service-row-left">
+              <span class="radio-indicator"></span>
+              <span class="service-name">${svc.name}</span>
             </div>
-            <span class="service-estimate">${waitText}</span>
+            <span class="service-wait">${waitText}</span>
           `;
 
           row.addEventListener('click', () => {
-            document.querySelectorAll('.service-option').forEach(el => {
+            document.querySelectorAll('.service-row').forEach(el => {
               el.classList.remove('selected');
               el.setAttribute('aria-checked', 'false');
             });
@@ -186,16 +205,15 @@
       }
     }
 
-    // Submit form to create token
-    document.getElementById('joinForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    // Submit button click
+    document.getElementById('submitBtn').addEventListener('click', async () => {
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>Printing ticket...</span>';
+      submitBtn.innerHTML = '<span>Getting token...</span>';
 
       try {
         const priorityType = document.getElementById('prioritySelect').value;
-        const travelMinutes = document.getElementById('travelMinutesInput').value;
+        const travelMinutes = document.getElementById('travelInput').value;
 
         const token = await API.createToken({
           branchId: currentBranchId,
@@ -205,10 +223,9 @@
           channel: 'web'
         });
 
-        // Redirect to hero token screen
         window.location.href = `/t/${token.publicId}`;
       } catch (err) {
-        alert(err.message || 'Error creating token. Please try again.');
+        alert(err.message || 'Could not create token. Please check your connection.');
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<span>Get my token</span>';
       }
