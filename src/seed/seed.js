@@ -6,10 +6,12 @@ const bcrypt = require('bcryptjs');
 const { Branch, Service, Counter, Token, QueueEvent, User, Sequence } = require('../models');
 const { getDayKey, generatePublicId } = require('../utils/helpers');
 
+const { connectToMongo } = require('../config/db');
+
 async function seed() {
   const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/baari';
   console.log('Connecting to database for seeding...');
-  await mongoose.connect(uri);
+  await connectToMongo(uri);
 
   // Clear existing collections
   console.log('Clearing old data...');
