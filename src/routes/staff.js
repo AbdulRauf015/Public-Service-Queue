@@ -62,10 +62,16 @@ router.get('/staff/queue', async (req, res) => {
       })
     );
 
+    const noShows = await Token.find({ branchId, status: 'no_show', recallCount: { $lt: 1 } })
+      .populate('serviceId', 'name prefix')
+      .sort({ updatedAt: -1 })
+      .limit(10);
+
     res.json({
       branch: { _id: branch._id, name: branch.name, type: branch.type },
       counters,
       waiting: waitingWithEstimates,
+      noShows,
       totalWaiting: waitingTokens.length
     });
   } catch (error) {

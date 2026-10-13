@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Console · Baari</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    body {
+      background: var(--mist);
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+    }
+    .staff-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr 360px;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* Left Sidebar */
+    .sidebar {
+      background: var(--ink);
+      color: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .sidebar-brand {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      color: #FFFFFF;
+      text-decoration: none;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar-brand span.sub {
+      color: var(--ticket);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    .nav-item {
+      color: #94A3B8;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: var(--r-panel);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: #FFFFFF;
+    }
+    .user-profile {
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 14px;
+    }
+    .btn-logout {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #CBD5E1;
+      padding: 8px 12px;
+      border-radius: var(--r-panel);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 100%;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-logout:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
+    }
+
+    /* Center Pane (Counters & Operations) */
+    .center-pane {
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 24px;
+      gap: 24px;
+    }
+    .pane-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .pane-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin: 0;
+      color: var(--ink);
+    }
+
+    /* Counters Grid */
+    .counters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+    }
+    .counter-tile {
+      background: var(--paper);
+      border: 1.5px solid var(--line);
+      border-radius: var(--r-panel);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: var(--card-shadow);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .counter-tile.is-active {
+      border-color: var(--signal);
+      box-shadow: 0 4px 14px rgba(47, 91, 234, 0.12);
+    }
+    .counter-tile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .counter-tile-name {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0;
+      color: var(--ink);
+    }
+    .status-chip {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: var(--r-pill);
+      letter-spacing: 0.3px;
+    }
+    .status-chip.open { background: #DCFCE7; color: #15803D; }
+    .status-chip.break { background: #FEF3C7; color: #B45309; }
+    .status-chip.closed { background: #FEE2E2; color: #B91C1C; }
+
+    .token-display-box {
+      background: var(--mist);
+      border-radius: var(--r-panel);
+      padding: 16px 14px;
+      text-align: center;
+      min-height: 104px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .current-token-code {
+      font-family: var(--font-display);
+      font-size: 44px;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 6px;
+      color: var(--ink);
+    }
+    .timer-badge {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--signal);
+      background: var(--paper);
+      padding: 3px 12px;
+      border-radius: var(--r-pill);
+      border: 1px solid var(--line);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .idle-label {
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 18px;
+      text-transform: lowercase;
+    }
+
+    .counter-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .btn-call-next {
+      background: var(--signal);
+      color: #FFFFFF;
+      border: none;
+      border-radius: var(--r-panel);
+      font-size: 16px;
+      font-weight: 800;
+      padding: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 48px;
+      box-shadow: 0 4px 12px rgba(47, 91, 234, 0.22);
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-call-next:hover {
+      background: #254ED0;
+    }
+    .btn-call-next:active {
+      transform: scale(0.98);
+    }
+
+    .btn-action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .btn-tile-action {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px;
+      border-radius: var(--r-panel);
+      cursor: pointer;
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-tile-action.start {
+      background: var(--signal);
+      color: #FFFFFF;
+      border-color: var(--signal);
+    }
+    .btn-tile-action.start:hover {
+      background: #254ED0;
+    }
+    .btn-tile-action.noshow {
+      background: var(--paper);
+      color: var(--flag);
+      border-color: #FECACA;
+    }
+    .btn-tile-action.noshow:hover {
+      background: #FEE2E2;
+    }
+    .btn-complete {
+      background: var(--go);
+      color: #FFFFFF;
+      border: none;
+      border-radius: var(--r-panel);
+      font-size: 16px;
+      font-weight: 800;
+      padding: 14px;
+      cursor: pointer;
+      min-height: 48px;
+      box-shadow: 0 4px 12px rgba(20, 163, 127, 0.25);
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-complete:hover {
+      background: #0E8365;
+    }
+    .btn-complete:active {
+      transform: scale(0.98);
+    }
+
+    .counter-toggle-row {
+      display: flex;
+      gap: 6px;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      justify-content: space-between;
+    }
+    .btn-status-toggle {
+      flex: 1;
+      background: var(--mist);
+      border: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 6px 4px;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+    .btn-status-toggle:hover {
+      background: #E2E8F0;
+      color: var(--ink);
+    }
+    .btn-status-toggle.active {
+      background: var(--ink);
+      color: #FFFFFF;
+      border-color: var(--ink);
+    }
+
+    /* Staff Copilot Box */
+    .copilot-card {
+      background: #EFF6FF;
+      border: 1.5px solid #BFDBFE;
+      border-radius: var(--r-panel);
+      padding: 18px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .copilot-text {
+      font-size: 15px;
+      color: #1E3A8A;
+      line-height: 1.45;
+    }
+
+    /* Right Pane (Waiting Queue & No-Shows) */
+    .right-pane {
+      background: var(--paper);
+      border-left: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 24px 18px;
+      gap: 16px;
+    }
+    .waiting-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-walkin {
+      background: var(--ticket);
+      color: var(--ink);
+      border: 1.5px solid #E0A100;
+      font-size: 14px;
+      font-weight: 800;
+      padding: 8px 16px;
+      border-radius: var(--r-pill);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(224, 161, 0, 0.25);
+      transition: transform 0.1s ease;
+    }
+    .btn-walkin:active {
+      transform: scale(0.97);
+    }
+    .queue-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+    }
+    .queue-row {
+      background: var(--mist);
+      border: 1px solid var(--line);
+      border-radius: var(--r-panel);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .queue-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .queue-token-code {
+      font-family: var(--font-display);
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .queue-svc-badge {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .priority-banner {
+      background: #FEF3C7;
+      color: #92400E;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-p-verify {
+      background: var(--go);
+      color: #FFFFFF;
+      border: none;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+    .btn-p-reject {
+      background: var(--flag);
+      color: #FFFFFF;
+      border: none;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 800;
+      margin-left: 4px;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      background: var(--ink);
+      color: #FFFFFF;
+      padding: 12px 20px;
+      border-radius: var(--r-panel);
+      font-size: 15px;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      animation: slideIn 0.25s ease;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(16px); opacity: 0; }
+      to { transform: none; opacity: 1; }
+    }
+
+    /* Walk-in Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(20, 33, 61, 0.55);
+      backdrop-filter: blur(4px);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-card {
+      background: var(--paper);
+      border-radius: var(--r-ticket);
+      width: 440px;
+      max-width: 90vw;
+      padding: 28px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Print styling for Walk-In ticket (58 mm width) */
+    @media print {
+      body * { visibility: hidden !important; }
+      #printableTicket, #printableTicket * { visibility: visible !important; }
+      #printableTicket {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 58mm !important;
+        margin: 0 !important;
+        padding: 4mm !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: var(--font-body);
+        font-size: 11pt !important;
+        text-align: center !important;
+      }
+      .ticket-print-code {
+        font-family: var(--font-display) !important;
+        font-size: 48pt !important;
+        font-weight: 900 !important;
+        line-height: 1 !important;
+        margin: 4mm 0 !important;
+        color: #000000 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="staff-layout">
+    <!-- 1. Left Sidebar -->
+    <aside class="sidebar">
+      <a href="/staff" class="sidebar-brand">
+        <span>Baari</span>
+        <span class="sub">Staff</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="/staff" class="nav-item active">Queue Control</a>
+        <a href="/admin" class="nav-item">Analytics</a>
+        <a href="/display/demo" class="nav-item" target="_blank">Display Board ↗</a>
+      </nav>
+
+      <div class="user-profile">
+        <div style="font-weight: 700; color: #FFFFFF;" id="staffName">Staff Operator</div>
+        <div style="color: #94A3B8; font-size: 13px;" id="staffRole">Operator</div>
+        <button type="button" class="btn-logout" id="logoutBtn">Sign out</button>
+      </div>
+    </aside>
+
+    <!-- 2. Center Pane: Counters Grid -->
+    <main class="center-pane">
+      <div class="pane-header">
+        <div>
+          <h1 class="pane-title">Counters</h1>
+          <div style="font-size: 14px; color: var(--muted); margin-top: 4px;">
+            Keyboard shortcut <kbd style="background: var(--paper); border: 1px solid var(--line); padding: 2px 7px; border-radius: 4px; font-weight: 800; font-family: var(--font-display);">N</kbd> to Call next
+          </div>
+        </div>
+        <div id="branchIndicator" style="font-size: 15px; font-weight: 700; color: var(--muted);">City Civic Center</div>
+      </div>
+
+      <div class="counters-grid" id="countersGrid">
+        <div style="grid-column: 1 / -1; padding: 32px; text-align: center; color: var(--muted);">
+          Loading counters...
+        </div>
+      </div>
+
+      <!-- Staff Copilot Suggestion Box -->
+      <section class="copilot-card" id="copilotCard">
+        <div>
+          <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #2563EB; margin-bottom: 4px;">Staff Copilot</div>
+          <div class="copilot-text" id="copilotText">All counters operating normally. Waiting times within expected range.</div>
+        </div>
+        <button type="button" class="btn-sm" id="copilotActionBtn" style="display: none; background: #2563EB; color: #fff; border: none; padding: 8px 16px; border-radius: var(--r-pill); font-weight: 700; cursor: pointer;">Open Counter</button>
+      </section>
+    </main>
+
+    <!-- 3. Right Pane: Waiting Queue & No-Shows -->
+    <aside class="right-pane">
+      <div class="waiting-header">
+        <h2 style="font-size: 18px; font-weight: 800; margin: 0;">Waiting (<span id="totalWaitingCount">0</span>)</h2>
+        <button type="button" class="btn-walkin" id="openWalkinModalBtn">+ Walk-in token</button>
+      </div>
+
+      <div class="queue-list" id="waitingQueueList">
+        <div style="padding: 24px; text-align: center; color: var(--muted);">
+          No one is waiting. New tokens will appear here.
+        </div>
+      </div>
+
+      <!-- No-Shows & Recall Section -->
+      <div class="waiting-header" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line);">
+        <div>
+          <h3 style="font-size: 16px; font-weight: 800; margin: 0; color: var(--muted);">Recent No-Shows (<span id="totalNoShowCount">0</span>)</h3>
+          <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">One-time recall to 3rd position</div>
+        </div>
+      </div>
+
+      <div class="queue-list" id="noShowList">
+        <div style="padding: 12px; font-size: 14px; text-align: center; color: var(--muted);">
+          No recent no-shows.
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Toast Feed -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Walk-in Modal -->
+  <div class="modal-backdrop" id="walkinModal">
+    <div class="modal-card">
+      <h3 style="font-size: 20px; font-weight: 800; margin: 0 0 18px; color: var(--ink);">Issue Walk-in Ticket</h3>
+      <form id="walkinForm">
+        <div class="form-field">
+          <label for="walkinService" class="field-label">Service</label>
+          <select id="walkinService" class="custom-select" required></select>
+        </div>
+
+        <div class="form-field" style="margin-top: 14px;">
+          <label for="walkinName" class="field-label">Visitor name (optional)</label>
+          <input type="text" id="walkinName" class="custom-input" placeholder="e.g. Baba Raza">
+        </div>
+
+        <div class="form-field" style="margin-top: 14px;">
+          <label for="walkinPriority" class="field-label">Priority assistance</label>
+          <select id="walkinPriority" class="custom-select">
+            <option value="normal">None (Standard)</option>
+            <option value="senior">Senior citizen</option>
+            <option value="pregnant">Pregnant</option>
+            <option value="disabled">Disabled</option>
+            <option value="emergency">Emergency</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button type="button" class="btn-secondary" id="closeWalkinBtn">Cancel</button>
+          <button type="submit" class="btn-primary" id="issueWalkinBtn">Issue & Print</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hidden Printable Ticket (58 mm receipt) -->
+  <div id="printableTicket" style="display: none;">
+    <div style="font-weight: 800; font-size: 14pt;">Baari · Civic Services</div>
+    <div style="font-size: 10pt; color: #555; margin-bottom: 2mm;" id="printBranchName">City Civic Center</div>
+    <div style="font-size: 11pt; font-weight: 700;" id="printServiceName">Lab tests</div>
+    <div class="ticket-print-code" id="printTokenCode">L-014</div>
+    <div style="font-weight: 700; margin-bottom: 2mm;" id="printWaitInfo">5 people ahead · ~12 min wait</div>
+    <div style="margin: 3mm 0;">
+      <img id="printQrImage" src="" alt="Token QR" style="width: 32mm; height: 32mm;">
+    </div>
+    <div style="font-size: 9pt; line-height: 1.3;">
+      Watch the display board for your number.<br>Scan QR to track on phone.
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/socket.js"></script>
+  <script>
+    const authToken = localStorage.getItem('baari_token');
+    const userStr = localStorage.getItem('baari_user');
+    let currentUser = null;
+    let branchId = null;
+    let activeCounters = [];
+    let waitingTokens = [];
+    let noShowTokens = [];
+    let timerInterval = null;
+
+    if (!authToken) {
+      window.location.href = '/login.html';
+    } else {
+      try {
+        currentUser = JSON.parse(userStr);
+        document.getElementById('staffName').textContent = currentUser.name || 'Staff Operator';
+        document.getElementById('staffRole').textContent = currentUser.role || 'Operator';
+        branchId = currentUser.branchId;
+      } catch (e) {
+        window.location.href = '/login.html';
+      }
+    }
+
+    // Toast helper
+    function showToast(message) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 3500);
+    }
+
+    // Authenticated API helper
+    async function staffFetch(url, options = {}) {
+      const headers = options.headers || {};
+      headers['Authorization'] = `Bearer ${authToken}`;
+      if (options.body && typeof options.body === 'object') {
+        headers['Content-Type'] = 'application/json';
+        options.body = JSON.stringify(options.body);
+      }
+      options.headers = headers;
+
+      const res = await fetch(url, options);
+      if (res.status === 401) {
+        localStorage.clear();
+        window.location.href = '/login.html';
+        return;
+      }
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error ? data.error.message : 'Operation failed');
+      }
+      return data;
+    }
+
+    // Load full dashboard queue
+    async function loadDashboard() {
+      try {
+        const data = await staffFetch(`/api/staff/queue?branchId=${branchId}`);
+        if (!data) return;
+        activeCounters = data.counters || [];
+        waitingTokens = data.waiting || [];
+        noShowTokens = data.noShows || [];
+
+        renderCounters(activeCounters);
+        renderWaitingList(waitingTokens);
+        renderNoShowList(noShowTokens);
+
+        document.getElementById('totalWaitingCount').textContent = data.totalWaiting || 0;
+        document.getElementById('totalNoShowCount').textContent = noShowTokens.length || 0;
+        if (data.branch && data.branch.name) {
+          document.getElementById('branchIndicator').textContent = data.branch.name;
+        }
+        updateCopilotAdvice(activeCounters, waitingTokens);
+      } catch (err) {
+        console.error('Failed to load staff queue:', err);
+      }
+    }
+
+    // Render Counter Tiles
+    function renderCounters(counters) {
+      const grid = document.getElementById('countersGrid');
+      grid.innerHTML = '';
+
+      counters.forEach((c) => {
+        const tile = document.createElement('div');
+        tile.className = 'counter-tile' + (c.status === 'open' && c.currentTokenId ? ' is-active' : '');
+        tile.dataset.id = c._id;
+
+        const currentTok = c.currentTokenId;
+        const isIdle = !currentTok;
+        const statusLabel = c.status === 'open' ? 'Open' : c.status === 'break' ? 'Paused' : 'Closed';
+        const statusClass = c.status === 'open' ? 'open' : c.status === 'break' ? 'break' : 'closed';
+        const svcNames = (c.serviceIds || []).map(s => s.prefix).join(', ');
+
+        let displayHtml = '';
+        let priorityTileHtml = '';
+
+        if (currentTok) {
+          const code = currentTok.code || '---';
+          const startTime = currentTok.servingStartedAt || currentTok.calledAt || Date.now();
+          displayHtml = `
+            <div class="current-token-code num">${code}</div>
+            <div class="timer-badge num" data-start="${new Date(startTime).getTime()}">00:00</div>
+          `;
+
+          // If current token has priority claim, allow verification directly at counter
+          if (currentTok.priorityType && currentTok.priorityType !== 'normal') {
+            const pVer = currentTok.priorityVerified;
+            priorityTileHtml = `
+              <div class="priority-banner" style="margin-top: 6px;">
+                <span>★ ${currentTok.priorityType} (+${currentTok.bonusMinutes}m)</span>
+                <div>
+                  ${pVer === null ? `
+                    <button type="button" class="btn-p-verify" onclick="handlePriority('${currentTok._id}', true)">Verify</button>
+                    <button type="button" class="btn-p-reject" onclick="handlePriority('${currentTok._id}', false)">Reject</button>
+                  ` : pVer ? `
+                    <span style="color: var(--go); font-size: 11px;">Verified ✓</span>
+                  ` : `
+                    <span style="color: var(--flag); font-size: 11px;">Rejected</span>
+                  `}
+                </div>
+              </div>
+            `;
+          }
+        } else {
+          displayHtml = `<div class="idle-label">idle</div>`;
+        }
+
+        // Action buttons
+        let actionsHtml = '';
+        if (c.status === 'open') {
+          if (isIdle) {
+            actionsHtml = `
+              <button type="button" class="btn-call-next" onclick="handleCallNext('${c._id}')">
+                Call next (N)
+              </button>
+            `;
+          } else if (currentTok.status === 'called') {
+            actionsHtml = `
+              <div class="btn-action-row">
+                <button type="button" class="btn-tile-action start" onclick="handleStartServing('${currentTok._id}')">
+                  Start serving
+                </button>
+                <button type="button" class="btn-tile-action noshow" onclick="handleNoShow('${currentTok._id}')">
+                  Mark no-show
+                </button>
+              </div>
+            `;
+          } else if (currentTok.status === 'serving') {
+            actionsHtml = `
+              <button type="button" class="btn-complete" onclick="handleComplete('${currentTok._id}')">
+                Complete
+              </button>
+            `;
+          }
+        }
+
+        tile.innerHTML = `
+          <div class="counter-tile-header">
+            <div>
+              <h3 class="counter-tile-name">${c.name}</h3>
+              <div style="font-size: 13px; color: var(--muted);">${svcNames}</div>
+            </div>
+            <span class="status-chip ${statusClass}">${statusLabel}</span>
+          </div>
+
+          <div class="token-display-box">
+            ${displayHtml}
+          </div>
+          ${priorityTileHtml}
+
+          <div class="counter-actions">
+            ${actionsHtml}
+            <div class="counter-toggle-row">
+              <button type="button" class="btn-status-toggle ${c.status === 'open' ? 'active' : ''}" onclick="setCounterStatus('${c._id}', 'open')">Open</button>
+              <button type="button" class="btn-status-toggle ${c.status === 'break' ? 'active' : ''}" onclick="setCounterStatus('${c._id}', 'break')">Pause</button>
+              <button type="button" class="btn-status-toggle ${c.status === 'closed' ? 'active' : ''}" onclick="setCounterStatus('${c._id}', 'closed')">Close</button>
+            </div>
+          </div>
+        `;
+
+        grid.appendChild(tile);
+      });
+
+      startTimers();
+    }
+
+    // Live Timers for busy counters
+    function startTimers() {
+      if (timerInterval) clearInterval(timerInterval);
+      function update() {
+        document.querySelectorAll('.timer-badge').forEach(badge => {
+          const start = parseInt(badge.dataset.start, 10);
+          if (start) {
+            const elapsed = Math.max(0, Math.floor((Date.now() - start) / 1000));
+            const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+            const s = String(elapsed % 60).padStart(2, '0');
+            badge.textContent = `${m}:${s}`;
+          }
+        });
+      }
+      update();
+      timerInterval = setInterval(update, 1000);
+    }
+
+    // Render Waiting List
+    function renderWaitingList(tokens) {
+      const list = document.getElementById('waitingQueueList');
+      list.innerHTML = '';
+
+      if (tokens.length === 0) {
+        list.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--muted);">No one is waiting. New tokens will appear here.</div>`;
+        return;
+      }
+
+      tokens.forEach((t) => {
+        const row = document.createElement('div');
+        row.className = 'queue-row';
+
+        const isPriority = t.priorityType && t.priorityType !== 'normal';
+        const svcName = t.serviceId ? t.serviceId.name : 'General';
+        const waitMin = t.estimateSec ? `~${Math.round(t.estimateSec / 60)}m` : '';
+
+        let priorityHtml = '';
+        if (isPriority) {
+          const verified = t.priorityVerified;
+          priorityHtml = `
+            <div class="priority-banner">
+              <span>★ ${t.priorityType} (+${t.bonusMinutes}m)</span>
+              <div>
+                ${verified === null ? `
+                  <button type="button" class="btn-p-verify" onclick="handlePriority('${t._id}', true)">Verify</button>
+                  <button type="button" class="btn-p-reject" onclick="handlePriority('${t._id}', false)">Reject</button>
+                ` : verified ? `
+                  <span style="color: var(--go); font-size: 11px;">Verified ✓</span>
+                ` : `
+                  <span style="color: var(--flag); font-size: 11px;">Rejected</span>
+                `}
+              </div>
+            </div>
+          `;
+        }
+
+        row.innerHTML = `
+          <div class="queue-row-top">
+            <span class="queue-token-code num">${t.code}</span>
+            <span class="queue-svc-badge">${svcName} · ${waitMin}</span>
+          </div>
+          ${priorityHtml}
+        `;
+
+        list.appendChild(row);
+      });
+    }
+
+    // Render No-Show List with Recall button
+    function renderNoShowList(noShows) {
+      const list = document.getElementById('noShowList');
+      list.innerHTML = '';
+
+      if (!noShows || noShows.length === 0) {
+        list.innerHTML = `<div style="padding: 12px; font-size: 14px; text-align: center; color: var(--muted);">No recent no-shows.</div>`;
+        return;
+      }
+
+      noShows.forEach((t) => {
+        const row = document.createElement('div');
+        row.className = 'queue-row';
+        row.style.background = '#F8FAFC';
+        const svcName = t.serviceId ? t.serviceId.name : 'Service';
+
+        row.innerHTML = `
+          <div class="queue-row-top">
+            <div>
+              <span class="queue-token-code num" style="color: var(--muted);">${t.code}</span>
+              <span class="queue-svc-badge" style="margin-left: 8px;">${svcName}</span>
+            </div>
+            <button type="button" style="background: var(--ink); color: #fff; padding: 5px 12px; font-size: 12px; border-radius: var(--r-pill); cursor: pointer; font-weight: 700; border: none;" onclick="handleRecall('${t._id}')">
+              Recall
+            </button>
+          </div>
+        `;
+
+        list.appendChild(row);
+      });
+    }
+
+    // Copilot Advice Engine
+    function updateCopilotAdvice(counters, tokens) {
+      const card = document.getElementById('copilotCard');
+      const text = document.getElementById('copilotText');
+      const btn = document.getElementById('copilotActionBtn');
+
+      const labTokens = tokens.filter(t => t.serviceId && t.serviceId.prefix === 'L');
+      const closedCounter3 = counters.find(c => c.number === 3 && c.status === 'closed');
+
+      if (labTokens.length >= 2 && closedCounter3) {
+        text.innerHTML = `<strong>Staff Copilot:</strong> Lab wait is elevated (${labTokens.length} waiting). Open Counter 3 to bring it to half.`;
+        btn.style.display = 'block';
+        btn.textContent = 'Open Counter 3';
+        btn.onclick = () => setCounterStatus(closedCounter3._id, 'open');
+      } else {
+        text.textContent = 'All counters operating smoothly. No urgent reallocations suggested.';
+        btn.style.display = 'none';
+      }
+    }
+
+    // Action Handlers
+    async function handleCallNext(counterId) {
+      try {
+        const res = await staffFetch(`/api/counters/${counterId}/call-next`, { method: 'POST' });
+        if (res.token) {
+          showToast(`Called token ${res.token.code}`);
+        } else {
+          showToast('No eligible tokens waiting for this counter');
+        }
+        loadDashboard();
+      } catch (err) {
+        showToast(err.message);
+      }
+    }
+
+    async function handleStartServing(tokenId) {
+      try {
+        await staffFetch(`/api/tokens/${tokenId}/start`, { method: 'POST' });
+        showToast('Started serving');
+        loadDashboard();
+      } catch (err) {
+        showToast(err.message);
+      }
+    }
+
+    async function handleComplete(tokenId) {
+      try {
+        await staffFetch(`/api/tokens/${tokenId}/complete`, { method: 'POST' });
+        showToast('Completed token');
+        loadDashboard();
+      } catch (err) {
+        showToast(err.message);
+      }
+    }
+
+    async function handleNoShow(tokenId) {
+      try {
+        await staffFetch(`/api/tokens/${tokenId}/no-show`, { method: 'POST' });
+        showToast('Marked no-show');
+        loadDashboard();
+      } catch (err) {
+        showToast(err.message);
+      }
+    }
+
+    async function handleRecall(tokenId) {
+      try {
+        const res = await staffFetch(`/api/tokens/${tokenId}/recall`, { method: 'POST' });
+        showToast(`Recalled token ${res.token.code}`);
+        loadDashboard();
+      } catch (err) {
+        showToast(err.message);
+      }
+    }
+
+    async function setCounterStatus(counterId, status) {
+      try {
+        await staffFetch(`/api/counters/${counterId}/status`, {
+          method: 'POST',
+          body: { status }
+        });
+        showToast(`Counter status updated to ${status}`);
+        loadDashboard();
+      } catch (err) {
+        showToast(err.message);
+      }
+    }
+
+    async function handlePriority(tokenId, verified) {
+      try {
+        await staffFetch(`/api/tokens/${tokenId}/priority`, {
+          method: 'POST',
+          body: { verified }
+        });
+        showToast(verified ? 'Priority verified' : 'Priority rejected');
+        loadDashboard();
+      } catch (err) {
+        showToast(err.message);
+      }
+    }
+
+    // Keyboard shortcut 'N' for Call Next
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'n' || e.key === 'N') {
+        // Prevent trigger if focused on an input
+        if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+        
+        // Find first open idle counter
+        const idleCounter = activeCounters.find(c => c.status === 'open' && !c.currentTokenId);
+        if (idleCounter) {
+          handleCallNext(idleCounter._id);
+        } else {
+          showToast('No idle open counter available to call next');
+        }
+      }
+    });
+
+    // Walk-in Ticket Modal Handling
+    const modal = document.getElementById('walkinModal');
+    document.getElementById('openWalkinModalBtn').addEventListener('click', async () => {
+      // Populate services
+      const svcSelect = document.getElementById('walkinService');
+      svcSelect.innerHTML = '';
+      const publicData = await API.getBranchPublic(branchId);
+      publicData.services.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s._id;
+        opt.textContent = `${s.name} (${s.prefix})`;
+        svcSelect.appendChild(opt);
+      });
+      modal.classList.add('open');
+    });
+
+    document.getElementById('closeWalkinBtn').addEventListener('click', () => {
+      modal.classList.remove('open');
+    });
+
+    document.getElementById('walkinForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const serviceId = document.getElementById('walkinService').value;
+      const customerName = document.getElementById('walkinName').value;
+      const priorityType = document.getElementById('walkinPriority').value;
+
+      try {
+        const res = await staffFetch('/api/tokens/walk-in', {
+          method: 'POST',
+          body: { branchId, serviceId, priorityType, customerName }
+        });
+
+        modal.classList.remove('open');
+        showToast(`Walk-in token ${res.token.code} created`);
+        loadDashboard();
+
+        // Populate 58mm thermal ticket and trigger print
+        const p = res.printable;
+        document.getElementById('printBranchName').textContent = p.branchName;
+        document.getElementById('printServiceName').textContent = p.serviceName;
+        document.getElementById('printTokenCode').textContent = p.code;
+        document.getElementById('printWaitInfo').textContent = `${p.peopleAhead} ahead · ~${p.estimatedWaitMin} min wait`;
+        document.getElementById('printQrImage').src = p.qrDataUrl;
+
+        document.getElementById('printableTicket').style.display = 'block';
+        window.print();
+        setTimeout(() => {
+          document.getElementById('printableTicket').style.display = 'none';
+        }, 1000);
+      } catch (err) {
+        showToast(err.message);
+      }
+    });
+
+    // Sign out
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.clear();
+      window.location.href = '/login.html';
+    });
+
+    // Initialize Socket.IO and live data
+    SocketManager.init({
+      onConnect: () => SocketManager.joinBranch(branchId),
+      onQueueUpdate: () => loadDashboard(),
+      onCounterUpdate: () => loadDashboard(),
+      onTokenCalled: () => loadDashboard()
+    });
+
+    loadDashboard();
+  </script>
+</body>
+</html>

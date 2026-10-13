@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Sign In · Baari</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .login-container {
+      max-width: 400px;
+      margin: 80px auto;
+      padding: 0 20px;
+    }
+    .login-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--r-panel);
+      padding: 32px 28px;
+      box-shadow: 0 4px 16px rgba(20, 33, 61, 0.06);
+    }
+    .demo-hint {
+      background: #F1F5F9;
+      border: 1px solid var(--line);
+      border-radius: var(--r-panel);
+      padding: 12px 14px;
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 20px;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .demo-hint strong {
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <a href="/" class="brand-logo" style="justify-content: center;">
+        <span>Baari</span>
+        <span class="sub">Staff Console</span>
+      </a>
+      <p style="color: var(--muted); margin: 8px 0 0; font-size: 15px;">Sign in to manage counters and queue</p>
+    </div>
+
+    <div class="login-card">
+      <form id="loginForm">
+        <div class="form-field">
+          <label for="email" class="field-label">Email address</label>
+          <input type="email" id="email" class="custom-input" placeholder="staff@baari.test" required autocomplete="email">
+        </div>
+
+        <div class="form-field" style="margin-top: 18px;">
+          <label for="password" class="field-label">Password</label>
+          <input type="password" id="password" class="custom-input" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" id="loginBtn" class="btn-primary" style="margin-top: 24px;">
+          <span>Sign in</span>
+        </button>
+      </form>
+
+      <div class="demo-hint">
+        <strong>Demo credentials:</strong><br>
+        <code>staff@baari.test</code> / <code>demo1234</code>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span>Signing in...</span>';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error ? data.error.message : 'Invalid login credentials');
+        }
+
+        // Store JWT token and user info
+        localStorage.setItem('baari_token', data.token);
+        localStorage.setItem('baari_user', JSON.stringify(data.user));
+
+        window.location.href = '/staff';
+      } catch (err) {
+        alert(err.message || 'Login failed');
+        btn.disabled = false;
+        btn.innerHTML = '<span>Sign in</span>';
+      }
+    });
+  </script>
+</body>
+</html>
