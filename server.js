@@ -13,12 +13,13 @@ const connectDB = require('./src/config/db');
 const app = express();
 const server = http.createServer(app);
 
-// Initialize Socket.IO on the HTTP server with CORS support
+// Initialize Socket.IO on the HTTP server with CORS and fallback transports
 const io = new Server(server, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST', 'PATCH', 'DELETE']
-  }
+  },
+  transports: ['websocket', 'polling']
 });
 
 // Attach io instance to express app so routes/controllers can access it via req.app.get('io')
@@ -91,7 +92,8 @@ const { startNotifier } = require('./src/services/notifier');
 connectDB().then(() => {
   startNotifier(io);
   server.listen(PORT, () => {
-    console.log(`Baari server listening on http://localhost:${PORT}`);
+    const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
+    console.log(`Baari server listening on ${baseUrl} (port ${PORT})`);
   });
 });
 

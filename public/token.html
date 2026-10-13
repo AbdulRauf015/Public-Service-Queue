@@ -17,38 +17,48 @@
     <!-- Top Bar -->
     <header class="top-nav">
       <a href="/" class="brand-logo">
-        <span>Baari</span>
+        <span data-i18n="brand_name">Baari</span>
         <span class="sub" id="serviceNavLabel">Queue</span>
       </a>
-      <div class="lang-switch" role="group" aria-label="Language">
-        <button type="button" class="lang-btn active" data-lang="en">EN</button>
-        <button type="button" class="lang-btn" data-lang="ur">اردو</button>
-        <button type="button" class="lang-btn" data-lang="sd">سنڌي</button>
+
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <!-- Accessibility Controls (Large text A+, High contrast) -->
+        <div class="a11y-controls" role="group" aria-label="Accessibility controls">
+          <button type="button" class="a11y-btn" id="largeTextToggle" title="Large text (20px)" aria-label="Toggle large text">A+</button>
+          <button type="button" class="a11y-btn" id="highContrastToggle" title="High contrast" aria-label="Toggle high contrast">◐</button>
+        </div>
+
+        <!-- Language Switch -->
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" class="lang-btn active" data-lang="en">EN</button>
+          <button type="button" class="lang-btn" data-lang="ur">اردو</button>
+          <button type="button" class="lang-btn" data-lang="sd">سنڌي</button>
+        </div>
       </div>
     </header>
 
     <main>
-      <!-- Optional In-page Alert Banner (Leave now / Almost your turn) -->
-      <div id="alertBanner" class="alert-banner almost" style="display: none;" role="alert">
+      <!-- Optional In-page Alert Banner (aria-live="assertive" for turn/leave alerts) -->
+      <div id="alertBanner" class="alert-banner almost" style="display: none;" role="alert" aria-live="assertive">
         <span id="bannerText"></span>
       </div>
 
       <!-- Hero Ticket: The first and biggest thing on screen -->
       <div class="ticket-wrapper">
-        <article id="ticketStub" class="ticket printing" aria-live="polite">
-          <div class="ticket-top-label">Your token</div>
-          <div class="ticket-code num" id="ticketCode">---</div>
+        <article id="ticketStub" class="ticket printing">
+          <div class="ticket-top-label" data-i18n="your_token">Your token</div>
+          <div class="ticket-code num" id="ticketCode" dir="ltr">---</div>
           
           <div class="perf" aria-hidden="true"></div>
 
-          <!-- Large readable text inside the ticket (min 20px) -->
-          <div id="ticketAhead" class="ticket-ahead">Calculating...</div>
-          <div id="ticketEstimate" class="ticket-estimate">Estimated wait calculating...</div>
+          <!-- Large readable text inside the ticket (min 20px) with aria-live="polite" -->
+          <div id="ticketAhead" class="ticket-ahead" aria-live="polite">Calculating...</div>
+          <div id="ticketEstimate" class="ticket-estimate" aria-live="polite">Estimated wait calculating...</div>
           <div id="ticketConfidence" class="ticket-confidence">Confidence: Good</div>
 
           <!-- Called state elements inside the green ticket -->
           <div id="calledPanel" style="display: none;">
-            <button type="button" id="imHereBtn" class="btn-im-here">
+            <button type="button" id="imHereBtn" class="btn-im-here" data-i18n="im_here">
               I'm here
             </button>
             <div>
@@ -61,8 +71,8 @@
       <!-- Queue Lane -->
       <section class="queue-lane-box" aria-labelledby="queueLaneTitle">
         <div class="queue-lane-header">
-          <span id="queueLaneTitle">Queue lane</span>
-          <span id="queueLaneAheadCount" style="font-size: 15px; color: var(--muted); font-weight: 600;">0 ahead</span>
+          <span id="queueLaneTitle" data-i18n="queue_lane">Queue lane</span>
+          <span id="queueLaneAheadCount" style="font-size: 15px; color: var(--muted); font-weight: 600;" aria-live="polite">0 ahead</span>
         </div>
         <div class="queue-lane-track" id="queueLaneTrack" aria-label="People ahead moving to counter">
           <!-- Dots render here -->
@@ -71,23 +81,23 @@
 
       <!-- Smart Leave Alert -->
       <section class="travel-card">
-        <div style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">Smart leave alert</div>
-        <div style="font-size: 15px; color: var(--muted);">Enter travel time so you can wait elsewhere and arrive just in time.</div>
+        <div style="font-size: 16px; font-weight: 700; margin-bottom: 4px;" data-i18n="travel_label">Smart leave alert</div>
+        <div style="font-size: 15px; color: var(--muted);" data-i18n="travel_note">Enter travel time so you can wait elsewhere and arrive just in time.</div>
         <div class="travel-row">
-          <span>I am</span>
+          <span data-i18n="im_away">I am</span>
           <input type="number" id="travelInput" class="travel-input" placeholder="20" min="0" max="180">
-          <span>min away</span>
-          <button type="button" id="updateTravelBtn" class="btn-update">Update</button>
+          <span data-i18n="min_away">min away</span>
+          <button type="button" id="updateTravelBtn" class="btn-update" data-i18n="update">Update</button>
         </div>
         <div id="leaveGuidanceText" class="travel-note"></div>
       </section>
 
       <!-- Action Buttons -->
       <div class="actions-grid">
-        <button type="button" id="shareBtn" class="btn-secondary">
+        <button type="button" id="shareBtn" class="btn-secondary" data-i18n="share_link">
           Share link
         </button>
-        <button type="button" id="cancelBtn" class="btn-secondary" style="color: var(--flag); border-color: #FECACA;">
+        <button type="button" id="cancelBtn" class="btn-secondary" style="color: var(--flag); border-color: #FECACA;" data-i18n="cancel_token">
           Cancel token
         </button>
       </div>
@@ -95,17 +105,19 @@
 
     <!-- Honest Footer Note -->
     <footer class="honest-footer">
-      <div>Estimates update live. They are not promises.</div>
+      <div data-i18n="honest_note">Estimates update live. They are not promises.</div>
     </footer>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/i18n.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/socket.js"></script>
   <script src="/js/notify.js"></script>
   <script>
     let publicId = null;
     let currentToken = null;
+    let lastQueueData = null;
     let graceCountdownInterval = null;
 
     function getPublicId() {
@@ -126,6 +138,13 @@
 
       await loadTokenDetails();
 
+      // Re-render when language changes
+      window.addEventListener('languageChanged', () => {
+        if (currentToken) {
+          renderToken(currentToken, lastQueueData);
+        }
+      });
+
       // Socket setup
       const socket = SocketManager.init({
         onConnect: () => {
@@ -143,7 +162,8 @@
         onTokenCalled: (data) => {
           if (data.publicId === publicId) {
             loadTokenDetails();
-            NotifyManager.trigger('called', `Your turn! Please proceed to ${data.counterName || 'Counter'}`);
+            const cName = data.counterName || I18n.t('counter');
+            NotifyManager.trigger('called', I18n.t('state_called', { counter: cName }));
           }
         },
         onNotifyAlert: (data) => {
@@ -162,6 +182,7 @@
       try {
         const data = await API.getToken(publicId);
         currentToken = data.token;
+        lastQueueData = data.queue;
         renderToken(data.token, data.queue);
       } catch (err) {
         console.error('Error fetching token:', err);
@@ -170,12 +191,18 @@
 
     function renderToken(token, queue) {
       if (!token) return;
+      lastQueueData = queue;
 
       const aheadCount = queue ? queue.ahead : 0;
-      document.title = `${token.code} · ${aheadCount} ahead | Baari`;
+      document.title = `${token.code} · ${aheadCount} ${I18n.t('ahead')} | Baari`;
 
-      // Top bar service name
-      const svcName = token.serviceId ? token.serviceId.name : 'Queue';
+      // Top bar service name with multilingual support
+      let svcName = token.serviceId ? token.serviceId.name : I18n.t('brand_sub');
+      if (I18n.currentLang === 'ur' && token.serviceId && token.serviceId.nameUr) {
+        svcName = token.serviceId.nameUr;
+      } else if (I18n.currentLang === 'sd' && token.serviceId && token.serviceId.nameSd) {
+        svcName = token.serviceId.nameSd;
+      }
       document.getElementById('serviceNavLabel').textContent = svcName;
 
       // Ticket Elements
@@ -189,62 +216,63 @@
       const bannerText = document.getElementById('bannerText');
 
       ticketCode.textContent = token.code;
-      document.getElementById('queueLaneAheadCount').textContent = `${aheadCount} people ahead`;
+      document.getElementById('queueLaneAheadCount').textContent = `${aheadCount} ${I18n.t('people_ahead')}`;
 
       // Reset state styles
       ticketStub.className = 'ticket';
       calledPanel.style.display = 'none';
       alertBanner.style.display = 'none';
 
-      const confText = queue && queue.confidence ? `Confidence: ${queue.confidence}` : 'Confidence: Good';
-      ticketConfidence.textContent = confText;
+      const confLevel = queue && queue.confidence ? queue.confidence : 'Good';
+      const confLabel = I18n.t('confidence_' + confLevel.toLowerCase()) || confLevel;
+      ticketConfidence.textContent = `${I18n.t('confidence_prefix')} ${confLabel}`;
+
+      const counterName = token.counterId ? token.counterId.name : I18n.t('counter');
 
       // Status specific rendering matching UI-UX.md table
       if (token.status === 'called') {
         ticketStub.classList.add('is-turn');
-        const counterName = token.counterId ? token.counterId.name : 'Counter';
-        ticketAhead.textContent = `Your turn. Go to ${counterName}.`;
-        ticketEstimate.textContent = 'Please proceed immediately';
+        ticketAhead.textContent = I18n.t('state_called', { counter: counterName });
+        ticketEstimate.textContent = I18n.t('your_turn');
 
         alertBanner.className = 'alert-banner turn';
-        bannerText.textContent = `Your turn. Go to ${counterName}.`;
+        bannerText.textContent = I18n.t('state_called', { counter: counterName });
         alertBanner.style.display = 'flex';
 
         calledPanel.style.display = 'block';
         startGraceTimer(token.calledAt);
       } else if (token.status === 'serving') {
         ticketStub.classList.add('is-turn');
-        const counterName = token.counterId ? token.counterId.name : 'Counter';
-        ticketAhead.textContent = `Being served at ${counterName}`;
-        ticketEstimate.textContent = 'Service in progress';
+        ticketAhead.textContent = I18n.t('state_serving', { counter: counterName });
+        ticketEstimate.textContent = I18n.t('brand_sub');
       } else if (token.status === 'completed') {
         ticketStub.style.background = 'var(--paper)';
         ticketStub.style.color = 'var(--ink)';
-        ticketAhead.textContent = 'Done. How was it?';
-        ticketEstimate.textContent = 'Thank you for waiting with Baari!';
+        ticketAhead.textContent = I18n.t('state_done');
+        ticketEstimate.textContent = I18n.t('feedback_thanks');
       } else if (token.status === 'no_show') {
         ticketStub.style.background = '#CBD5E1';
         ticketStub.style.color = '#334155';
-        ticketAhead.textContent = 'You missed your turn.';
-        ticketEstimate.textContent = 'Ask staff to recall your token.';
+        ticketAhead.textContent = I18n.t('state_noshow');
+        ticketEstimate.textContent = '';
       } else if (token.status === 'cancelled') {
         ticketStub.style.background = '#CBD5E1';
         ticketStub.style.color = '#334155';
-        ticketAhead.textContent = 'Token cancelled.';
-        ticketEstimate.textContent = 'Get a new token anytime.';
+        ticketAhead.textContent = I18n.t('state_cancelled');
+        ticketEstimate.textContent = '';
       } else {
         // Status: waiting
         if (queue && queue.openCounters === 0) {
-          ticketAhead.textContent = 'No counter open right now';
-          ticketEstimate.textContent = 'We will tell you when one opens.';
+          ticketAhead.textContent = I18n.t('no_counter_open');
+          ticketEstimate.textContent = I18n.t('state_no_counter', { service: svcName });
         } else {
-          ticketAhead.textContent = `${aheadCount} people ahead`;
+          ticketAhead.textContent = I18n.t('state_waiting', { count: aheadCount });
           if (queue && queue.range) {
             const lowMin = Math.round(queue.range.low / 60);
             const highMin = Math.round(queue.range.high / 60);
-            ticketEstimate.textContent = `Estimated wait ${lowMin} to ${highMin} min`;
+            ticketEstimate.textContent = `${I18n.t('est_wait')} ${lowMin} to ${highMin} ${I18n.t('minutes')}`;
           } else {
-            ticketEstimate.textContent = 'Estimating wait time...';
+            ticketEstimate.textContent = `${I18n.t('est_wait')} ...`;
           }
 
           // In-page alerts from TRD 4.6
@@ -252,14 +280,14 @@
             const estMin = Math.round(queue.estimateSec / 60);
             if (estMin <= token.travelMinutes + 5) {
               alertBanner.className = 'alert-banner leave';
-              bannerText.textContent = 'Leave now. You will reach the counter just before your turn.';
+              bannerText.textContent = I18n.t('state_leave_now', { counter: counterName });
               alertBanner.style.display = 'flex';
             }
           }
 
           if (aheadCount <= 3 && aheadCount > 0 && alertBanner.style.display === 'none') {
             alertBanner.className = 'alert-banner almost';
-            bannerText.textContent = `Almost your turn. ${aheadCount} people ahead.`;
+            bannerText.textContent = I18n.t('state_almost', { count: aheadCount });
             alertBanner.style.display = 'flex';
           }
         }
@@ -271,7 +299,7 @@
       // Travel time update
       if (token.travelMinutes !== null && token.travelMinutes !== undefined) {
         document.getElementById('travelInput').value = token.travelMinutes;
-        renderTravelGuidance(token.travelMinutes, queue ? queue.estimateSec : null);
+        renderTravelGuidance(token.travelMinutes, queue ? queue.estimateSec : null, counterName);
       }
     }
 
@@ -289,7 +317,7 @@
       // Your dot in signal blue
       const you = document.createElement('span');
       you.className = 'lane-dot is-you';
-      you.textContent = 'You';
+      you.textContent = I18n.t('you');
       track.appendChild(you);
 
       // Trailing path dots toward counter
@@ -303,11 +331,11 @@
       // Counter desk icon
       const desk = document.createElement('span');
       desk.className = 'lane-desk';
-      desk.textContent = 'Counter';
+      desk.textContent = I18n.t('counter');
       track.appendChild(desk);
     }
 
-    function renderTravelGuidance(travelMin, estSec) {
+    function renderTravelGuidance(travelMin, estSec, counterName = 'Counter') {
       const guidance = document.getElementById('leaveGuidanceText');
       if (!estSec) {
         guidance.textContent = '';
@@ -317,13 +345,13 @@
       const diff = estMin - travelMin;
 
       if (diff <= 5 && diff >= 0) {
-        guidance.textContent = 'Leave now. You will reach the counter just before your turn.';
+        guidance.textContent = I18n.t('state_leave_now', { counter: counterName });
         guidance.style.color = 'var(--go)';
       } else if (diff > 5) {
-        guidance.textContent = `We will say "Leave now" in ~${diff - 5} min.`;
+        guidance.textContent = I18n.t('leave_in_hint', { time: diff - 5 });
         guidance.style.color = 'var(--signal)';
       } else {
-        guidance.textContent = 'Head to the counter as soon as possible.';
+        guidance.textContent = I18n.t('state_leave_now', { counter: counterName });
         guidance.style.color = 'var(--flag)';
       }
     }
@@ -337,10 +365,10 @@
       function tick() {
         const elapsed = Math.floor((Date.now() - start) / 1000);
         const left = Math.max(0, totalSec - elapsed);
-        badge.textContent = `Arrive within ${left}s`;
+        badge.textContent = I18n.t('arrive_within', { time: left });
         if (left === 0) {
           clearInterval(graceCountdownInterval);
-          badge.textContent = 'Grace time expired';
+          badge.textContent = I18n.t('state_noshow');
         }
       }
       tick();

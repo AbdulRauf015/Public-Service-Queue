@@ -303,7 +303,7 @@
   <main class="display-main">
     <!-- Now Serving Section -->
     <section>
-      <div class="section-label">Now Serving</div>
+      <div class="section-label" data-i18n="now_serving">Now Serving</div>
       <div class="serving-grid" id="servingGrid">
         <div class="empty-serving-box">
           Counters are preparing to call visitors.
@@ -313,7 +313,7 @@
 
     <!-- Next Section -->
     <section class="next-section">
-      <div class="section-label" style="font-size: 18px; margin-bottom: 12px;">Next in queue</div>
+      <div class="section-label" style="font-size: 18px; margin-bottom: 12px;" data-i18n="next">Next</div>
       <div class="next-row" id="nextRow">
         <div style="font-size: 20px; color: #94A3B8; font-weight: 600;">No one is waiting currently.</div>
       </div>
@@ -325,13 +325,13 @@
     <div class="qr-join-box">
       <img src="" id="joinQrImage" alt="Scan to join" class="qr-join-image">
       <div>
-        <div class="qr-join-text">Scan to join queue</div>
+        <div class="qr-join-text" data-i18n="scan_to_join">Scan to join queue</div>
         <div class="qr-join-sub">Track your live turn on your phone</div>
       </div>
     </div>
     <div class="avg-wait-box">
-      <span>Average wait today:</span>
-      <span class="avg-wait-number" id="avgWaitNumber">~11 min</span>
+      <span id="avgWaitLabel">Average wait today:</span>
+      <span class="avg-wait-number num" id="avgWaitNumber" dir="ltr">~11 min</span>
     </div>
   </footer>
 
@@ -339,7 +339,7 @@
   <div class="audio-overlay" id="audioOverlay">
     <div class="audio-overlay-content">
       <div class="audio-overlay-icon">🔊</div>
-      <div class="audio-overlay-title">Tap to enable voice</div>
+      <div class="audio-overlay-title" data-i18n="tap_to_enable_sound">Tap anywhere to enable sound announcements</div>
       <p style="color: #94A3B8; font-size: 16px; line-height: 1.4;">
         Browsers require a tap to activate voice calls and counter chimes.
       </p>
@@ -348,6 +348,7 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/i18n.js"></script>
   <script src="/js/socket.js"></script>
   <script>
     let branchId = null;
@@ -467,7 +468,8 @@
         }
 
         // Update Average wait
-        document.getElementById('avgWaitNumber').textContent = `~${data.avgWaitMin || 11} min`;
+        const waitM = data.avgWaitMin || 11;
+        document.getElementById('avgWaitNumber').textContent = `~${waitM} ${I18n.t('minutes')}`;
 
         // Render Now Serving
         renderNowServing(data.nowServing || []);

@@ -468,19 +468,19 @@ body {
 .alert-banner.leave {
   background: #DBEAFE;
   color: #1E40AF;
-  border-left: 4px solid var(--signal);
+  border-inline-start: 4px solid var(--signal);
 }
 
 .alert-banner.almost {
   background: #FEF3C7;
   color: #92400E;
-  border-left: 4px solid var(--hold);
+  border-inline-start: 4px solid var(--hold);
 }
 
 .alert-banner.turn {
   background: #DCFCE7;
   color: #14532D;
-  border-left: 4px solid var(--go);
+  border-inline-start: 4px solid var(--go);
 }
 
 /* Queue Lane (Large dots, clear track, counter desk icon) */

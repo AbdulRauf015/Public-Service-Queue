@@ -49,6 +49,7 @@ body {
   font-size: 16px;
   margin: 0;
   padding: 0;
+  text-align: start;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -62,6 +63,120 @@ body {
 :focus-visible {
   outline: 3px solid var(--signal);
   outline-offset: 2px;
+}
+
+/* Token code always renders Left-To-Right (UI-UX 2.2) */
+.ticket-code,
+.num,
+.token-code,
+.ticket-print-code,
+[dir="ltr"] {
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+}
+
+/* Accessibility: Large Text Scale (A+, base font 20px) */
+html.large-text,
+html.large-text body {
+  font-size: 20px !important;
+}
+
+html.large-text .hero-title {
+  font-size: 38px !important;
+}
+
+html.large-text .ticket-ahead {
+  font-size: 26px !important;
+}
+
+html.large-text .ticket-estimate {
+  font-size: 24px !important;
+}
+
+html.large-text .service-name,
+html.large-text .service-wait {
+  font-size: 20px !important;
+}
+
+/* Accessibility: High Contrast Mode */
+html.high-contrast,
+html.high-contrast body {
+  --mist: #FFFFFF;
+  --paper: #FFFFFF;
+  --ink: #000000;
+  --line: #000000;
+  --muted: #1A1A1A;
+  --signal: #002288;
+  --go: #055C3D;
+  --flag: #990000;
+  --ticket: #FFE066;
+  background: #FFFFFF !important;
+  color: #000000 !important;
+}
+
+html.high-contrast .ticket {
+  border: 3px solid #000000 !important;
+  box-shadow: none !important;
+}
+
+html.high-contrast .service-row,
+html.high-contrast .branch-card,
+html.high-contrast .travel-card,
+html.high-contrast .queue-lane-box,
+html.high-contrast .more-options-panel {
+  border: 2px solid #000000 !important;
+}
+
+html.high-contrast .busy-bar {
+  border: 1px solid #000000;
+}
+
+/* Accessibility Buttons */
+.a11y-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.a11y-btn {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 13px;
+  min-height: 36px;
+  min-width: 36px;
+  padding: 4px 8px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.a11y-btn:hover {
+  border-color: var(--signal);
+}
+
+.a11y-btn.active {
+  background: var(--ink);
+  color: #FFFFFF;
+  border-color: var(--ink);
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ticket.printing {
+    animation: none !important;
+  }
 }
 
 /* Perforated Tactile Ticket with side notches */

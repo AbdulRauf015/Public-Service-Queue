@@ -16,7 +16,7 @@ const {
 } = require('../services/queueEngine');
 const { getEstimate, getServiceEstimate } = require('../services/waitTime');
 const { emitQueueUpdate, emitCounterUpdate } = require('../sockets');
-const { getDayKey, generatePublicId } = require('../utils/helpers');
+const { getDayKey, generatePublicId, getBaseUrl } = require('../utils/helpers');
 
 // All staff routes require authentication
 router.use(authenticate);
@@ -332,8 +332,8 @@ router.post('/tokens/walk-in', async (req, res) => {
       emitQueueUpdate(io, branchId);
     }
 
-    // Generate QR code data URL for the walk-in ticket
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    // Generate QR code data URL for the walk-in ticket using BASE_URL
+    const baseUrl = getBaseUrl(req);
     const tokenUrl = `${baseUrl}/t/${publicId}`;
     const qrDataUrl = await QRCode.toDataURL(tokenUrl, { width: 180, margin: 1 });
 

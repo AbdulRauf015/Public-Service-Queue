@@ -9,47 +9,57 @@
 </head>
 <body>
   <div class="page-wrapper">
-    <!-- Top Bar with Language Switch -->
+    <!-- Top Bar with Language Switch and Accessibility Controls -->
     <header class="top-nav">
       <a href="/" class="brand-logo">
-        <span>Baari</span>
-        <span class="sub">باری</span>
+        <span data-i18n="brand_name">Baari</span>
+        <span class="sub" data-i18n="brand_sub">Queue</span>
       </a>
-      <div class="lang-switch" role="group" aria-label="Language">
-        <button type="button" class="lang-btn active" data-lang="en">EN</button>
-        <button type="button" class="lang-btn" data-lang="ur">اردو</button>
-        <button type="button" class="lang-btn" data-lang="sd">سنڌي</button>
+
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <!-- Accessibility Controls (Large text A+, High contrast) -->
+        <div class="a11y-controls" role="group" aria-label="Accessibility controls">
+          <button type="button" class="a11y-btn" id="largeTextToggle" title="Large text (20px)" aria-label="Toggle large text">A+</button>
+          <button type="button" class="a11y-btn" id="highContrastToggle" title="High contrast" aria-label="Toggle high contrast">◐</button>
+        </div>
+
+        <!-- Language Switch -->
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" class="lang-btn active" data-lang="en">EN</button>
+          <button type="button" class="lang-btn" data-lang="ur">اردو</button>
+          <button type="button" class="lang-btn" data-lang="sd">سنڌي</button>
+        </div>
       </div>
     </header>
 
     <main>
       <!-- Hero Headline -->
-      <h1 class="hero-title">Skip the line.<br>Keep your turn.</h1>
-      <p class="hero-subtitle">Wait anywhere. Be there when it's your baari.</p>
+      <h1 class="hero-title"><span data-i18n="tagline_1">Skip the line.</span><br><span data-i18n="tagline_2">Keep your turn.</span></h1>
+      <p class="hero-subtitle" data-i18n="tagline_sub">Wait anywhere. Be there when it's your baari.</p>
 
       <!-- Branch Status Card -->
       <section class="branch-card" aria-label="Location status">
         <div class="branch-header">
           <h2 class="branch-name" id="branchName">City Civic Center</h2>
-          <span class="demo-badge">demo data</span>
+          <span class="demo-badge" data-i18n="demo_data">demo data</span>
         </div>
         <div class="busy-meter">
-          <span>Busy now:</span>
+          <span data-i18n="busy_now">Busy now:</span>
           <div class="busy-bars" id="busyBars" aria-label="Busy level indicator">
             <span class="busy-bar active-1"></span>
             <span class="busy-bar active-2"></span>
             <span class="busy-bar"></span>
             <span class="busy-bar"></span>
           </div>
-          <strong id="busyLabel" style="color: var(--ink);">Moderate</strong>
+          <strong id="busyLabel" style="color: var(--ink);" data-i18n="busy_moderate">Moderate</strong>
         </div>
       </section>
 
       <!-- Service Selection (One decision per step) -->
       <section>
-        <h2 class="section-title">What do you need?</h2>
+        <h2 class="section-title" data-i18n="what_need">What do you need?</h2>
         <div class="services-list" id="servicesList" role="radiogroup" aria-label="Available services">
-          <div style="background: var(--paper); border: 1.5px solid var(--line); border-radius: var(--r-panel); padding: 18px 20px; text-align: center; color: var(--muted); min-height: 58px;">
+          <div style="background: var(--paper); border: 1.5px solid var(--line); border-radius: var(--r-panel); padding: 18px 20px; text-align: center; color: var(--muted); min-height: 58px;" data-i18n="loading_services">
             Loading services...
           </div>
         </div>
@@ -58,31 +68,31 @@
       <!-- Collapsible More Options (Priority & Travel Time) -->
       <button type="button" id="moreOptionsToggle" class="more-options-toggle">
         <span id="toggleIcon">+</span>
-        <span>More options (priority, travel time)</span>
+        <span data-i18n="more_options">More options (priority, travel time)</span>
       </button>
 
       <div id="moreOptionsPanel" class="more-options-panel">
         <!-- Priority Lane -->
         <div class="form-field">
-          <label for="prioritySelect" class="field-label">Need priority assistance?</label>
+          <label for="prioritySelect" class="field-label" data-i18n="priority_label">Need priority assistance?</label>
           <select id="prioritySelect" class="custom-select">
-            <option value="normal">None (Standard queue)</option>
-            <option value="senior">Senior citizen (+20 min bonus)</option>
-            <option value="pregnant">Pregnant (+20 min bonus)</option>
-            <option value="disabled">Disabled (+30 min bonus)</option>
-            <option value="emergency">Emergency (+120 min bonus)</option>
+            <option value="normal" data-i18n="priority_none">None (Standard queue)</option>
+            <option value="senior" data-i18n="priority_senior">Senior citizen (+20 min bonus)</option>
+            <option value="pregnant" data-i18n="priority_pregnant">Pregnant (+20 min bonus)</option>
+            <option value="disabled" data-i18n="priority_disabled">Disabled (+30 min bonus)</option>
+            <option value="emergency" data-i18n="priority_emergency">Emergency (+120 min bonus)</option>
           </select>
-          <div class="field-note">Staff will check priority at the counter.</div>
+          <div class="field-note" data-i18n="priority_note">Staff will check priority at the counter.</div>
         </div>
 
         <!-- Travel Time -->
         <div class="form-field" style="margin-top: 18px;">
-          <label for="travelInput" class="field-label">How far away are you?</label>
+          <label for="travelInput" class="field-label" data-i18n="travel_label">How far away are you?</label>
           <div style="display: flex; align-items: center; gap: 8px;">
             <input type="number" id="travelInput" class="custom-input" placeholder="e.g. 20" min="0" max="180" style="width: 100px;">
-            <span style="font-weight: 600; color: var(--muted);">minutes</span>
+            <span style="font-weight: 600; color: var(--muted);" data-i18n="travel_minutes">minutes</span>
           </div>
-          <div class="field-note">Optional. We will tell you when to leave so you arrive just before your turn.</div>
+          <div class="field-note" data-i18n="travel_note">Optional. We will tell you when to leave so you arrive just before your turn.</div>
         </div>
       </div>
     </main>
@@ -92,25 +102,27 @@
       <div id="bestTimeHint" style="font-weight: 700; color: var(--ink); margin-bottom: 4px;">
         Quietest time today: 2 to 3 pm
       </div>
-      <div>Estimates update live. They are not promises.</div>
+      <div data-i18n="honest_note">Estimates update live. They are not promises.</div>
     </footer>
 
     <!-- Fixed Bottom Sticky Button (One tap to get token) -->
     <div class="bottom-bar">
       <div class="bottom-bar-inner">
         <button type="button" id="submitBtn" class="btn-primary">
-          <span>Get my token</span>
+          <span data-i18n="get_token">Get my token</span>
         </button>
       </div>
     </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/i18n.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/socket.js"></script>
   <script>
     let currentBranchId = null;
     let selectedServiceId = null;
+    let cachedBranchData = null;
 
     // Toggle more options
     const moreToggle = document.getElementById('moreOptionsToggle');
@@ -134,6 +146,11 @@
 
         await loadBranchData(currentBranchId);
 
+        // Re-render when language changes
+        window.addEventListener('languageChanged', () => {
+          if (cachedBranchData) renderBranchData(cachedBranchData);
+        });
+
         // Real-time updates via Socket.IO
         SocketManager.init({
           onConnect: () => SocketManager.joinBranch(currentBranchId),
@@ -147,80 +164,87 @@
     async function loadBranchData(branchId) {
       try {
         const data = await API.getBranchPublic(branchId);
-        document.getElementById('branchName').textContent = data.branch.name;
-
-        // Render busy meter
-        const busyLabel = document.getElementById('busyLabel');
-        const busyBars = document.getElementById('busyBars');
-        busyLabel.textContent = data.busyLevel;
-
-        const score = data.busyScore || 2;
-        busyBars.innerHTML = '';
-        for (let i = 1; i <= 4; i++) {
-          const bar = document.createElement('span');
-          bar.className = `busy-bar ${i <= score ? `active-${score}` : ''}`;
-          busyBars.appendChild(bar);
-        }
-
-        // Render services list (min 58px tappable rows)
-        const container = document.getElementById('servicesList');
-        container.innerHTML = '';
-
-        data.services.forEach((svc, index) => {
-          const isSelected = selectedServiceId === svc._id || (!selectedServiceId && index === 0);
-          if (isSelected) selectedServiceId = svc._id;
-
-          const row = document.createElement('div');
-          row.className = `service-row ${isSelected ? 'selected' : ''}`;
-          row.role = 'radio';
-          row.tabIndex = 0;
-          row.setAttribute('aria-checked', isSelected ? 'true' : 'false');
-          row.dataset.id = svc._id;
-
-          const waitMin = svc.estimateSec !== null ? Math.round(svc.estimateSec / 60) : null;
-          const waitText = waitMin !== null ? `~${waitMin} min` : 'No counter open right now';
-
-          row.innerHTML = `
-            <div class="service-row-left">
-              <span class="radio-indicator"></span>
-              <span class="service-name">${svc.name}</span>
-            </div>
-            <span class="service-wait">${waitText}</span>
-          `;
-
-          row.addEventListener('click', async () => {
-            document.querySelectorAll('.service-row').forEach(el => {
-              el.classList.remove('selected');
-              el.setAttribute('aria-checked', 'false');
-            });
-            row.classList.add('selected');
-            row.setAttribute('aria-checked', 'true');
-            selectedServiceId = svc._id;
-
-            try {
-              const bestTime = await API.getBestTime(branchId, selectedServiceId);
-              if (bestTime && bestTime.label) {
-                document.getElementById('bestTimeHint').textContent = `Quietest time today: ${bestTime.label}`;
-              }
-            } catch (e) {
-              console.warn('Could not load best-time for service:', e.message);
-            }
-          });
-
-          container.appendChild(row);
-        });
-
-        // Load dynamic quietest time today hint
-        try {
-          const bestTime = await API.getBestTime(branchId, selectedServiceId);
-          if (bestTime && bestTime.label) {
-            document.getElementById('bestTimeHint').textContent = `Quietest time today: ${bestTime.label}`;
-          }
-        } catch (e) {
-          console.warn('Could not load best-time:', e.message);
-        }
+        cachedBranchData = data;
+        renderBranchData(data);
       } catch (err) {
         console.error('Error loading branch:', err);
+      }
+    }
+
+    function renderBranchData(data) {
+      document.getElementById('branchName').textContent = data.branch.name;
+
+      // Render busy meter with translation
+      const busyLabel = document.getElementById('busyLabel');
+      const busyBars = document.getElementById('busyBars');
+      const busyKey = 'busy_' + (data.busyLevel || 'moderate').toLowerCase().replace(' ', '_');
+      busyLabel.textContent = I18n.t(busyKey) || data.busyLevel;
+
+      const score = data.busyScore || 2;
+      busyBars.innerHTML = '';
+      for (let i = 1; i <= 4; i++) {
+        const bar = document.createElement('span');
+        bar.className = `busy-bar ${i <= score ? `active-${score}` : ''}`;
+        busyBars.appendChild(bar);
+      }
+
+      // Render services list (min 58px tappable rows)
+      const container = document.getElementById('servicesList');
+      container.innerHTML = '';
+
+      data.services.forEach((svc, index) => {
+        const isSelected = selectedServiceId === svc._id || (!selectedServiceId && index === 0);
+        if (isSelected) selectedServiceId = svc._id;
+
+        const row = document.createElement('div');
+        row.className = `service-row ${isSelected ? 'selected' : ''}`;
+        row.role = 'radio';
+        row.tabIndex = 0;
+        row.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+        row.dataset.id = svc._id;
+
+        // Multilingual service name support
+        let displayName = svc.name;
+        if (I18n.currentLang === 'ur' && svc.nameUr) displayName = svc.nameUr;
+        else if (I18n.currentLang === 'sd' && svc.nameSd) displayName = svc.nameSd;
+
+        const waitMin = svc.estimateSec !== null ? Math.round(svc.estimateSec / 60) : null;
+        const waitText = waitMin !== null ? `~${waitMin} ${I18n.t('minutes')}` : I18n.t('no_counter_open');
+
+        row.innerHTML = `
+          <div class="service-row-left">
+            <span class="radio-indicator"></span>
+            <span class="service-name">${displayName}</span>
+          </div>
+          <span class="service-wait">${waitText}</span>
+        `;
+
+        row.addEventListener('click', async () => {
+          document.querySelectorAll('.service-row').forEach(el => {
+            el.classList.remove('selected');
+            el.setAttribute('aria-checked', 'false');
+          });
+          row.classList.add('selected');
+          row.setAttribute('aria-checked', 'true');
+          selectedServiceId = svc._id;
+          updateBestTimeHint();
+        });
+
+        container.appendChild(row);
+      });
+
+      updateBestTimeHint();
+    }
+
+    async function updateBestTimeHint() {
+      if (!currentBranchId) return;
+      try {
+        const bestTime = await API.getBestTime(currentBranchId, selectedServiceId);
+        if (bestTime && bestTime.label) {
+          document.getElementById('bestTimeHint').textContent = `${I18n.t('quietest_time_today')} ${bestTime.label}`;
+        }
+      } catch (e) {
+        console.warn('Could not load best-time:', e.message);
       }
     }
 
@@ -228,7 +252,7 @@
     document.getElementById('submitBtn').addEventListener('click', async () => {
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>Getting token...</span>';
+      submitBtn.innerHTML = `<span>${I18n.t('getting_token')}</span>`;
 
       try {
         const priorityType = document.getElementById('prioritySelect').value;
@@ -239,14 +263,15 @@
           serviceId: selectedServiceId,
           priorityType,
           travelMinutes: travelMinutes ? Number(travelMinutes) : null,
-          channel: 'web'
+          channel: 'web',
+          language: I18n.currentLang
         });
 
         window.location.href = `/t/${token.publicId}`;
       } catch (err) {
-        alert(err.message || 'Could not create token. Please check your connection.');
+        alert(err.message || I18n.t('server_error'));
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Get my token</span>';
+        submitBtn.innerHTML = `<span>${I18n.t('get_token')}</span>`;
       }
     });
 

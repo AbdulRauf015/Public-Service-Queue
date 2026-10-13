@@ -28,8 +28,25 @@ function clamp(val, min, max) {
   return Math.max(min, Math.min(max, val));
 }
 
+/**
+ * Resolves application base URL, strictly prioritizing process.env.BASE_URL
+ */
+function getBaseUrl(req) {
+  if (process.env.BASE_URL) {
+    return process.env.BASE_URL.replace(/\/+$/, '');
+  }
+  if (req) {
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+    const host = req.headers['x-forwarded-host'] || req.get('host');
+    if (host) return `${protocol}://${host}`;
+  }
+  return `http://localhost:${process.env.PORT || 3000}`;
+}
+
 module.exports = {
   getDayKey,
   generatePublicId,
-  clamp
+  clamp,
+  getBaseUrl
 };
+

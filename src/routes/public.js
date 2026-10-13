@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const { Branch, Service, Counter, Token, QueueEvent, Sequence } = require('../models');
-const { getDayKey, generatePublicId } = require('../utils/helpers');
+const { getDayKey, generatePublicId, getBaseUrl } = require('../utils/helpers');
 const { getEstimate, getServiceEstimate } = require('../services/waitTime');
 const { emitQueueUpdate } = require('../sockets');
 
@@ -91,8 +91,8 @@ async function getDisplayDataHandler(req, res) {
     }
     const avgWaitMin = activeSvcCount > 0 ? Math.round((totalEstSec / activeSvcCount) / 60) : 11;
 
-    // 4. Generate Join QR code
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    // 4. Generate Join QR code using BASE_URL
+    const baseUrl = getBaseUrl(req);
     const joinUrl = `${baseUrl}/q/${branchId}`;
     const qrDataUrl = await QRCode.toDataURL(joinUrl, { width: 180, margin: 1 });
 
@@ -125,7 +125,7 @@ router.get('/branches/:branchId/display', getDisplayDataHandler);
 router.get('/branches/:branchId/qr.png', async (req, res) => {
   try {
     const { branchId } = req.params;
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const baseUrl = getBaseUrl(req);
     const joinUrl = `${baseUrl}/q/${branchId}`;
     const buffer = await QRCode.toBuffer(joinUrl, { width: 300, margin: 1 });
     res.type('image/png').send(buffer);
