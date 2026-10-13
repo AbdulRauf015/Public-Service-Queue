@@ -34,6 +34,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // API routes
 const publicRoutes = require('./src/routes/public');
+const authRoutes = require('./src/routes/auth');
+const staffRoutes = require('./src/routes/staff');
+const { setupSockets } = require('./src/sockets');
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -44,28 +47,13 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Mount public routes
+// Mount API routes
+app.use('/api/auth', authRoutes);
 app.use('/api', publicRoutes);
+app.use('/api', staffRoutes);
 
-// Basic Socket.IO connection listener
-io.on('connection', (socket) => {
-  console.log(`Socket connected: ${socket.id}`);
-
-  // Allow client to join branch or token rooms
-  socket.on('join:branch', (branchId) => {
-    socket.join(`branch:${branchId}`);
-    console.log(`Socket ${socket.id} joined room branch:${branchId}`);
-  });
-
-  socket.on('join:token', (publicId) => {
-    socket.join(`token:${publicId}`);
-    console.log(`Socket ${socket.id} joined room token:${publicId}`);
-  });
-
-  socket.on('disconnect', () => {
-    console.log(`Socket disconnected: ${socket.id}`);
-  });
-});
+// Initialize Socket.IO handlers
+setupSockets(io);
 
 // Start the server after connecting to MongoDB
 const PORT = process.env.PORT || 3000;

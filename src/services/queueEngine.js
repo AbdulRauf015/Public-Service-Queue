@@ -2,6 +2,12 @@
 // Core Queue Engine for Baari: atomic call-next, lifecycle transitions, EMA updates, and priority demotion
 const { Token, Counter, Service, Branch, QueueEvent } = require('../models');
 const { updateEma } = require('./waitTime');
+const {
+  emitQueueUpdate,
+  emitTokenUpdate,
+  emitTokenCalled,
+  emitCounterUpdate
+} = require('../sockets');
 
 /**
  * Call the next eligible waiting token for a given counter
@@ -54,23 +60,10 @@ async function callNext(counterId, staffId = null, io = null) {
     });
 
     if (io) {
-      io.to(`branch:${counter.branchId}`).emit('token:called', {
-        publicId: token.publicId,
-        code: token.code,
-        counterName: counter.name
-      });
-      io.to(`branch:${counter.branchId}`).emit('queue:updated', {
-        branchId: counter.branchId,
-        serviceId: token.serviceId,
-        change: 'token_called',
-        tokenCode: token.code
-      });
-      io.to(`branch:${counter.branchId}`).emit('counter:updated', {
-        counterId: counter._id,
-        status: counter.status,
-        currentToken: token
-      });
-      io.to(`token:${token.publicId}`).emit('token:updated', { token });
+      emitTokenCalled(io, counter.branchId, token.publicId, token.code, counter.name);
+      emitCounterUpdate(io, counter.branchId, counter._id, counter.status, token);
+      emitQueueUpdate(io, counter.branchId);
+      emitTokenUpdate(io, token.publicId);
     }
   }
 
@@ -163,18 +156,10 @@ async function completeToken(tokenId, io = null) {
   });
 
   if (io) {
-    io.to(`branch:${token.branchId}`).emit('queue:updated', {
-      branchId: token.branchId,
-      serviceId: token.serviceId,
-      change: 'token_completed',
-      tokenCode: token.code
-    });
-    io.to(`token:${token.publicId}`).emit('token:updated', { token });
+    emitQueueUpdate(io, token.branchId);
+    emitTokenUpdate(io, token.publicId);
     if (token.counterId) {
-      io.to(`branch:${token.branchId}`).emit('counter:updated', {
-        counterId: token.counterId,
-        currentToken: null
-      });
+      emitCounterUpdate(io, token.branchId, token.counterId, 'open', null);
     }
   }
 
@@ -211,18 +196,10 @@ async function markNoShow(tokenId, io = null) {
   });
 
   if (io) {
-    io.to(`branch:${token.branchId}`).emit('queue:updated', {
-      branchId: token.branchId,
-      serviceId: token.serviceId,
-      change: 'token_no_show',
-      tokenCode: token.code
-    });
-    io.to(`token:${token.publicId}`).emit('token:updated', { token });
+    emitQueueUpdate(io, token.branchId);
+    emitTokenUpdate(io, token.publicId);
     if (token.counterId) {
-      io.to(`branch:${token.branchId}`).emit('counter:updated', {
-        counterId: token.counterId,
-        currentToken: null
-      });
+      emitCounterUpdate(io, token.branchId, token.counterId, 'open', null);
     }
   }
 

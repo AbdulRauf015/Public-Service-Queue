@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Baari - Live Socket.IO Event Inspector</title>
+  <style>
+    :root {
+      --ink: #14213D;
+      --mist: #EEF2F8;
+      --paper: #FFFFFF;
+      --signal: #2F5BEA;
+      --ticket: #FFD23F;
+      --go: #14A37F;
+      --flag: #D9462F;
+      --muted: #5B6785;
+      --line: #D5DCEA;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--mist);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .badge.connected { background: rgba(20, 163, 127, 0.15); color: var(--go); }
+    .badge.disconnected { background: rgba(217, 70, 47, 0.15); color: var(--flag); }
+    .grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+    }
+    .card {
+      background: var(--paper);
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      box-shadow: 0 4px 12px rgba(20, 33, 61, 0.04);
+    }
+    h2 { font-size: 16px; margin: 0 0 14px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
+    .field { margin-bottom: 14px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    button {
+      background: var(--signal);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      width: 100%;
+      margin-top: 4px;
+      transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.9; }
+    .btn-secondary { background: var(--mist); color: var(--ink); border: 1px solid var(--line); margin-top: 8px; }
+    .feed {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 580px;
+      overflow-y: auto;
+    }
+    .event-card {
+      background: var(--mist);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 13px;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: none; }
+    }
+    .event-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      align-items: center;
+    }
+    .event-name {
+      font-weight: 700;
+      font-family: monospace;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .event-name.queue-updated { background: #dbeafe; color: #1e40af; }
+    .event-name.token-called { background: #dcfce7; color: #15803d; }
+    .event-name.token-updated { background: #fef3c7; color: #b45309; }
+    .event-name.counter-updated { background: #f3e8ff; color: #6b21a8; }
+    .event-time { color: var(--muted); font-size: 12px; }
+    pre {
+      margin: 0;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      overflow-x: auto;
+    }
+    .stats-box {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+    .stats-box div { margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Baari · Live Socket Inspector <span id="statusBadge" class="badge disconnected">Disconnected</span></h1>
+      <span style="font-size: 13px; color: var(--muted)">Open in 2 tabs to watch real-time syncing</span>
+    </header>
+
+    <div class="grid">
+      <!-- Controls Panel -->
+      <div class="card">
+        <h2>Room Subscriptions</h2>
+        <div class="field">
+          <label for="branchInput">Branch ID</label>
+          <input type="text" id="branchInput" placeholder="Loading branch...">
+          <button id="joinBranchBtn" style="margin-top: 8px">Join Branch Room</button>
+        </div>
+
+        <div class="field" style="margin-top: 16px;">
+          <label for="tokenInput">Token Public ID (Optional)</label>
+          <input type="text" id="tokenInput" placeholder="e.g. jchs2tLUgC2p">
+          <button id="joinTokenBtn" class="btn-secondary">Join Token Room</button>
+        </div>
+
+        <button id="clearLogsBtn" class="btn-secondary" style="margin-top: 20px;">Clear Event Logs</button>
+
+        <div class="stats-box">
+          <strong>Quick Instructions:</strong>
+          <p style="margin: 6px 0 0; color: var(--muted); line-height: 1.4;">
+            1. Open this page in two separate browser tabs.<br>
+            2. Trigger an action (like calling next or joining).<br>
+            3. Both tabs will instantly receive and log the event here in real time.
+          </p>
+        </div>
+      </div>
+
+      <!-- Live Stream Feed -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <h2 style="margin: 0;">Live Socket Events Feed (<span id="eventCount">0</span>)</h2>
+        </div>
+        <div id="eventFeed" class="feed">
+          <div style="color: var(--muted); text-align: center; padding: 40px 0;">
+            Waiting for Socket.IO events...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let count = 0;
+    const feed = document.getElementById('eventFeed');
+    const badge = document.getElementById('statusBadge');
+    const eventCount = document.getElementById('eventCount');
+    const branchInput = document.getElementById('branchInput');
+    const tokenInput = document.getElementById('tokenInput');
+
+    // Auto-fetch demo branch ID on load
+    fetch('/api/branches/demo')
+      .then(res => res.json())
+      .then(data => {
+        if (data.branchId) {
+          branchInput.value = data.branchId;
+          socket.emit('join:branch', data.branchId);
+        }
+      })
+      .catch(err => console.log('Could not auto-fetch demo branch:', err));
+
+    // Connect / Disconnect handlers
+    socket.on('connect', () => {
+      badge.textContent = `Connected (${socket.id})`;
+      badge.className = 'badge connected';
+      logEvent('socket:connected', { socketId: socket.id });
+
+      if (branchInput.value.trim()) {
+        socket.emit('join:branch', branchInput.value.trim());
+      }
+    });
+
+    socket.on('disconnect', () => {
+      badge.textContent = 'Disconnected';
+      badge.className = 'badge disconnected';
+      logEvent('socket:disconnected', { status: 'offline' });
+    });
+
+    // Room confirmations
+    socket.on('joined:branch', (data) => logEvent('joined:branch', data));
+    socket.on('joined:token', (data) => logEvent('joined:token', data));
+
+    // Core Baari Queue Events
+    socket.on('queue:updated', (data) => logEvent('queue:updated', data));
+    socket.on('token:updated', (data) => logEvent('token:updated', data));
+    socket.on('token:called', (data) => logEvent('token:called', data));
+    socket.on('counter:updated', (data) => logEvent('counter:updated', data));
+
+    function logEvent(eventName, payload) {
+      if (count === 0) {
+        feed.innerHTML = '';
+      }
+      count++;
+      eventCount.textContent = count;
+
+      const card = document.createElement('div');
+      card.className = 'event-card';
+
+      let cssClass = 'queue-updated';
+      if (eventName === 'token:called') cssClass = 'token-called';
+      else if (eventName === 'token:updated') cssClass = 'token-updated';
+      else if (eventName === 'counter:updated') cssClass = 'counter-updated';
+
+      const timeStr = new Date().toLocaleTimeString();
+
+      card.innerHTML = `
+        <div class="event-header">
+          <span class="event-name ${cssClass}">${eventName}</span>
+          <span class="event-time">${timeStr}</span>
+        </div>
+        <pre>${JSON.stringify(payload, null, 2)}</pre>
+      `;
+
+      feed.insertBefore(card, feed.firstChild);
+    }
+
+    // Join room buttons
+    document.getElementById('joinBranchBtn').addEventListener('click', () => {
+      const bId = branchInput.value.trim();
+      if (bId) {
+        socket.emit('join:branch', bId);
+        logEvent('emit:join:branch', { branchId: bId });
+      }
+    });
+
+    document.getElementById('joinTokenBtn').addEventListener('click', () => {
+      const tId = tokenInput.value.trim();
+      if (tId) {
+        socket.emit('join:token', tId);
+        logEvent('emit:join:token', { publicId: tId });
+      }
+    });
+
+    document.getElementById('clearLogsBtn').addEventListener('click', () => {
+      feed.innerHTML = '<div style="color: var(--muted); text-align: center; padding: 40px 0;">Waiting for Socket.IO events...</div>';
+      count = 0;
+      eventCount.textContent = '0';
+    });
+  </script>
+</body>
+</html>

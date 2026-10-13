@@ -17,6 +17,20 @@ function calculateBusyLevel(totalWaiting) {
 }
 
 /**
+ * GET /api/branches/demo
+ * Returns the demo branch ID
+ */
+router.get('/branches/demo', async (req, res) => {
+  try {
+    const branch = await Branch.findOne({ isDemo: true });
+    if (!branch) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Demo branch not found' } });
+    res.json({ branchId: branch._id });
+  } catch (err) {
+    res.status(500).json({ error: { code: 'SERVER_ERROR', message: err.message } });
+  }
+});
+
+/**
  * GET /api/branches/:branchId/public
  * Returns branch info, services, live waiting stats, and busy level
  */

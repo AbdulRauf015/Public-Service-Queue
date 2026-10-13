@@ -206,14 +206,62 @@ async function runStage3Tests() {
   }
   console.log('   Priority demotion correctly wiped bonus to 0 and restored join time!');
 
-  // TEST 7: What-If Engine
-  console.log('\n7. Testing What-If Engine...');
-  const whatIfResult = await whatIf(branch._id, labService._id, 1);
-  console.log(`   What-If (+1 counter): Before=${whatIfResult.beforeMin} min, After=${whatIfResult.afterMin} min, Saved=${whatIfResult.savedMin} min`);
-  if (whatIfResult.afterMin === null || whatIfResult.targetCounters !== whatIfResult.currentCounters + 1) {
-    throw new Error('What-If engine returned invalid output');
+  // TEST 7: What-If Engine (1 open counter, 10 waiting tokens -> +1 counter halves the wait)
+  console.log('\n7. Testing What-If Engine (1 open counter, 10 waiting tokens)...');
+  await Service.deleteMany({ branchId: branch._id, prefix: 'W' });
+  const whatIfService = await Service.create({
+    branchId: branch._id,
+    name: 'What-If Test Service',
+    prefix: 'W',
+    defaultServiceSec: 120, // 2 minutes per customer
+    emaServiceSec: 120,
+    sampleCount: 20
+  });
+
+  // Assign whatIfService to counter2 and ensure open
+  const previousCounter2Services = counter2.serviceIds;
+  counter2.serviceIds = [whatIfService._id];
+  counter2.status = 'open';
+  counter2.currentTokenId = null;
+  await counter2.save();
+
+  // Create 10 waiting tokens for whatIfService
+  const whatIfTokens = [];
+  for (let i = 1; i <= 10; i++) {
+    whatIfTokens.push({
+      branchId: branch._id,
+      serviceId: whatIfService._id,
+      publicId: 'wi_tok_' + i + '_' + Math.random().toString(36).substring(7),
+      number: i,
+      code: `W-${String(i).padStart(3, '0')}`,
+      dayKey: '2026-10-13',
+      priorityType: 'normal',
+      bonusMinutes: 0,
+      joinedAt: new Date(now.getTime() - i * 60 * 1000),
+      effectiveTime: new Date(now.getTime() - i * 60 * 1000),
+      status: 'waiting'
+    });
   }
-  console.log('   What-If calculation verified!');
+  await Token.insertMany(whatIfTokens);
+
+  const whatIfResult = await whatIf(branch._id, whatIfService._id, 1);
+  console.log(`   What-If Result:`);
+  console.log(`     Current Counters: ${whatIfResult.currentCounters} -> Target Counters: ${whatIfResult.targetCounters}`);
+  console.log(`     Before Estimate: ${whatIfResult.beforeSec}s (${whatIfResult.beforeMin} min)`);
+  console.log(`     After Estimate:  ${whatIfResult.afterSec}s (${whatIfResult.afterMin} min)`);
+  console.log(`     Time Saved:      ${whatIfResult.savedSec}s (${whatIfResult.savedMin} min)`);
+
+  // Verification: 10 * 120s / 1 counter = 1200s (20m); with 2 counters = 600s (10m) -> roughly half!
+  if (whatIfResult.beforeMin !== 20 || whatIfResult.afterMin !== 10 || whatIfResult.savedMin !== 10) {
+    throw new Error(`What-If failed: expected 20m -> 10m (saved 10m), got ${whatIfResult.beforeMin}m -> ${whatIfResult.afterMin}m`);
+  }
+  console.log('   Wait time successfully halved from 20 min to 10 min by adding 1 counter!');
+
+  // Cleanup what-if tokens and service, restore counter2
+  await Token.deleteMany({ serviceId: whatIfService._id });
+  await Service.deleteOne({ _id: whatIfService._id });
+  counter2.serviceIds = previousCounter2Services;
+  await counter2.save();
 
   // TEST 8: Check User's Specific Stage 2 Fix (POST /tokens/:publicId/here status requirement)
   console.log('\n8. Testing Stage 2 Fix: POST /tokens/:publicId/here validation...');
